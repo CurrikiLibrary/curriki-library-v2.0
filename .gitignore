@@ -1,0 +1,26 @@
+# Ignore everything in the root except the wp-content directory
+/*
+!.gitignore
+!/wp-content/
+
+# Ignore everything in the wp-content directory except themes and plugins
+/wp-content/*
+!/wp-content/themes/
+/wp-content/themes/*
+!/wp-content/themes/genesis/
+/wp-content/themes/genesis-curriki/
+!/wp-content/plugins/
+/wp-content/plugins/*
+
+# Do not ignore the specific themes
+!/wp-content/themes/genesis/
+!/wp-content/themes/genesis-curriki/
+
+# Do not ignore the specific plugins
+!/wp-content/plugins/crurriki-group-library/
+!/wp-content/plugins/curriki_manage/
+!/wp-content/plugins/curriki-customized/
+!/wp-content/plugins/curriki-group-import/
+!/wp-content/plugins/curriki-manage-groups/
+!/wp-content/plugins/curriki-recommender/
+!/wp-content/plugins/curriki-site/
