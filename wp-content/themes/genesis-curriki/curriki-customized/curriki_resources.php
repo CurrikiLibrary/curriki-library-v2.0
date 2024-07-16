@@ -7,6 +7,191 @@
 
 class CurrikiResources {
 
+  function prepareCollectionDataSet($data) {
+    return array(
+      "resourceid" => $data['resourceid'],
+      "title" => $data['title'],
+      "content" => $data['content'],
+      "description" => $data['description'],
+      "reviewstatus" => "none",
+      "reviewrating" => null,
+      "standardsalignment" => null,
+      "standardsalignmentcomment" => null,
+      "subjectmatter" => null,
+      "subjectmattercomment" => null,
+      "supportsteaching" => null,
+      "supportsteachingcomment" => null,
+      "assessmentsquality" => null,
+      "assessmentsqualitycomment" => null,
+      "interactivityquality" => null,
+      "interactivityqualitycomment" => null,
+      "instructionalquality" => null,
+      "instructionalqualitycomment" => null,
+      "deeperlearning" => null,
+      "deeperlearningcomment" => null,
+      "memberrating" => null,
+      "partner" => "F",
+      "pageurl" => $data['pageurl'],
+      "contributorid_Name" => "Curriki Learn",
+      "thumb_image" => null,
+      "lp_object" => $data['lp_object'],
+      "lp_object_id" => $data['lp_object_id'],
+      "lp_course_id" => $data["lp_course_id"]
+    );
+    
+  }
+
+  function prepareResourceDataSet($data) {
+    $resource = array(
+      "partner" => "F",
+      "resourceid" => $data["ID"],
+      "title" => $data["post_title"],
+      "description" => $lp_description,
+      "content" => $data["post_content"],
+      'resourcetype' => $data["resourcetype"],
+      "type" => $data["resourcetype"],
+      "reviewstatus" => "none",
+      "reviewrating" => null,
+      "standardsalignment" => null,
+      "standardsalignmentcomment" => null,
+      "subjectmatter" => null,
+      "subjectmattercomment" => null,
+      "supportsteaching" => null,
+      "supportsteachingcomment" => null,
+      "assessmentsquality" => null,
+      "assessmentsqualitycomment" => null,
+      "interactivityquality" => null,
+      "interactivityqualitycomment" => null,
+      "instructionalquality" => null,
+      "instructionalqualitycomment" => null,
+      "deeperlearning" => null,
+      "deeperlearningcomment" => null,
+      "memberrating" => null,
+      "pageurl" => $data["post_name"],
+      "contributiondate" => $data["post_date"],
+      "studentfacing" => "",
+      "contentdisplayok" => null,
+      "reviewresource" => null,
+      "oldurl" => null,
+      "mediatype" => "external",
+      "keywords" => "AI, ai, artificial intelligence, Artificial Intelligence, AI, artificial intelligence",
+      "generatedkeywords" => null,
+      "approvalStatus" => "approved",
+      "userid" => $data["post_author"],
+      "display_name" => "Curriki Learn",
+      "blogs" => "currikilibrary.org",
+      "city" => "Cupertino",
+      "state" => "California",
+      "country" => "US",
+      "organization" => "Curriki Learn",
+      "registerdate" => "2017-03-14 14:55:14",
+      "uniqueavatarfile" => "5dd4114fbc1c1.jpg",
+      "fileid" => null,
+      "uniquename" => null,
+      "folder" => null,
+      "resourcechecked" => "F",
+      "resourcecheckrequestnote" => null,
+      "resourcechecknote" => null,
+      "license" => "CC BY-NC-SA",
+      "resource_active" => "T",
+      "lp_object" => $data["lp_object"],
+      "lp_object_id" => $data["lp_object_id"],
+      "lp_course_id" => $data["lp_course_id"]
+    );
+    return $resource;
+  }
+
+  function getLpPostByPageUrl($pageurl, $lp_object=null, $lp_object_id=0, $lp_course_id=0) {
+    // get wp query by slug where condition is post_name
+    global $wpdb;
+    $resource = false;
+    $q = "SELECT * FROM {$wpdb->prefix}posts WHERE post_name = '" . trim( rtrim($pageurl, '/') ) . "'";
+    $row = $wpdb->get_row($q);
+    if ($row) {
+      // $lp_description = strip_tags(preg_replace('/<style\b[^>]*>(.*?)<\/style>/i', '', $row->post_content));
+      $lp_description = strip_tags(substr($row->post_content, 0, 900));
+      $lp_description = strip_tags(preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $lp_description));
+      $lp_description = strip_tags(preg_replace('/\s*[^{}]+\{[^{}]*\}\s*/', '', $lp_description));
+
+      $resourcetype = 'collection';
+      if ($row->post_type === 'lp_lesson') {
+          $resourcetype = 'resource';
+      }
+
+      $data = (array) $row;
+      $data["resourcetype"] = $resourcetype;
+      $data["lp_object"] = $lp_object;
+      $data["lp_object_id"] = $lp_object_id;
+      $data["lp_course_id"] = $lp_course_id;
+      $resource = $this->prepareResourceDataSet($data);
+
+      if (function_exists('learn_press_get_course') && $resourcetype === 'collection') {
+        $course = learn_press_get_course( $row->ID );
+        foreach ($course->get_sections_data_arr() as $data) {
+          $data['resourceid'] = $data['section_id'];
+          $data['title'] = $data['section_name'];
+          $data["content"] = $data['section_description'];
+          $data["description"] = $data['section_description'];
+          $data["pageurl"] = $data['section_name'];
+          $data["lp_course_id"] = $row->ID;
+          $data['lp_object'] = 'lp_section';
+          $data["lp_object_id"] = $data['section_id'];
+          $resource["collection"][] = $this->prepareCollectionDataSet($data);
+        }
+      }      
+    } else if (!is_null($lp_object) && $lp_object === 'lp_section' && $lp_object_id != '' && $lp_course_id != '') {
+      // var_dump($lp_object);
+      // var_dump($lp_object_id);
+      // var_dump($lp_course_id);
+      $course = learn_press_get_course( $lp_course_id );
+      $sections = $course->get_sections_data_arr();
+      // echo "<pre>";
+      // print_r($sections);
+      // filter $sections by $lp_object_id being the section_id
+      $section = array_filter($sections, function($section) use ($lp_object_id) {
+        return $section['section_id'] == $lp_object_id;
+      });
+      
+      if ($section) {
+        $section = array_shift($section);
+        $resourcetype = 'collection';
+        $data = [];
+        $data["ID"] = $section["section_id"];
+        $data["post_title"] = $section["section_name"];
+        $data["post_content"] = $section["section_description"];
+        $data["post_name"] = $section["section_name"];
+        $data["post_date"] = "2024-07-05";
+        $data["post_author"] = 1;
+        $data["resourcetype"] = $resourcetype;
+        $data["lp_object"] = $lp_object;
+        $data["lp_object_id"] = $lp_object_id;
+        $data["lp_course_id"] = $lp_course_id;
+        $resource = $this->prepareResourceDataSet($data);  
+
+        foreach ($section["items"] as $section_lesson) {
+          $q = "SELECT * FROM {$wpdb->prefix}posts WHERE id = '" . $section_lesson->id . "'";
+          $lesson_row = $wpdb->get_row($q);
+
+          $lp_description = strip_tags(substr($lesson_row->post_content, 0, 900));
+          $lp_description = strip_tags(preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $lp_description));
+          $lp_description = strip_tags(preg_replace('/\s*[^{}]+\{[^{}]*\}\s*/', '', $lp_description));
+          $data['resourceid'] = $lesson_row->ID;
+          $data['title'] = $lesson_row->post_title;
+          $data["content"] = $lesson_row->post_content;
+          $data["description"] = $lp_description;
+          $data["pageurl"] = $lesson_row->post_name;
+          $data["lp_course_id"] = $lp_course_id;
+          $data['section_name'] = $lesson_row->post_title;
+          $data['lp_object'] = 'lp_lesson';
+          $data["lp_object_id"] = $lesson_row->ID;
+          $resource["collection"][] = $this->prepareCollectionDataSet($data);
+        }
+      }
+    }
+
+    return $resource;
+  }
+
   function getResourceById($resourceid = 0, $pageurl = '', $all = false) {
     global $wpdb;
 
@@ -95,8 +280,163 @@ class CurrikiResources {
       }
 
       return $resource;
-    } else
-      return false;
+    } else {
+      $resource = false;
+      if (isset($_GET['pageurl'])) {
+        
+        if (
+            isset($_GET['lp_object']) && $_GET['lp_object'] != ''
+            && isset($_GET['lp_object_id']) && $_GET['lp_object_id'] != ''
+            && isset($_GET['lp_course_id']) && $_GET['lp_course_id'] != ''
+        ) {
+          $lp_object = $_GET['lp_object'];
+          $lp_object_id = $_GET['lp_object_id'];
+          $lp_course_id = $_GET['lp_course_id'];
+          $resource = $this->getLpPostByPageUrl($_GET['pageurl'], $lp_object, $lp_object_id, $lp_course_id);
+        } else {
+          $resource = $this->getLpPostByPageUrl($_GET['pageurl']);
+        }
+        
+        $toc_persist = array();
+        $toc_persist_rids = array();
+        if (isset($_GET["mrid"])) {
+          $mrid_param = explode("-", $_GET["mrid"]);
+          if (in_array($resource['resourceid'], $mrid_param)) {
+            $pos = array_search($resource['resourceid'], $mrid_param);
+            unset($mrid_param[$pos]);
+          }
+
+          foreach ($mrid_param as $mrid) {
+            $rid_to_fetech_collection = 0;
+            $resources_table_of_content = new stdClass();
+            $resources_table_of_content->main_resource_resources = array();
+            $resources_table_of_content->current_resource_resources = array();
+
+            $toc_persist_rids[] = $mrid;
+            $rid_to_fetech_collection = $mrid;
+            
+            // if current resource id section then get the course as a parent
+            if ( isset($_GET['lp_object']) && $_GET['lp_object'] === 'lp_section' ) {
+              $resource_collection = [];
+              $course = learn_press_get_course( $lp_course_id );
+              foreach ($course->get_sections_data_arr() as $data) {
+                $data['resourceid'] = $data['section_id'];
+                $data['title'] = $data['section_name'];
+                $data["content"] = $data['section_description'];
+                $data["description"] = $data['section_description'];
+                $data["pageurl"] = $data['section_name'];
+                $data["lp_course_id"] = $lp_course_id;
+                $data['lp_object'] = 'lp_section';
+                $data["lp_object_id"] = $data['section_id'];
+                $resource_collection[] = $this->prepareCollectionDataSet($data);
+              }  
+
+              
+              $q = "SELECT * FROM {$wpdb->prefix}posts WHERE id = '" . $lp_course_id . "'";
+              $course_row = $wpdb->get_row($q);
+              $data = (array) $course_row;
+              $data["resourcetype"] = 'collection';
+              $data["post_title"] = $course_row->post_title;
+              $lp_object = $_GET['lp_object'];
+              $lp_object_id = $_GET['lp_object_id'];
+              $lp_course_id = $_GET['lp_course_id'];
+              $data["lp_object"] = $lp_object;
+              $data["lp_object_id"] = $lp_object_id;
+              $data["lp_course_id"] = $lp_course_id;
+              $resource_obj = (object) $this->prepareResourceDataSet($data);
+              $r_data = array(
+                  "resource" => $resource_obj,
+                  "collections" => $resource_collection
+              );
+              $resources_table_of_content->main_resource_resources = $r_data;
+              $toc_persist[] = $resources_table_of_content;
+              $resource = array_merge($resource, array('toc_persist' => $toc_persist));
+              $resource = array_merge($resource, array('toc_persist_rids' => $toc_persist_rids));
+
+            } else if ( isset($_GET['lp_object']) && $_GET['lp_object'] === 'lp_lesson' && $rid_to_fetech_collection == $_GET['lp_course_id'] ) {
+              $resource_collection = [];
+              $course = learn_press_get_course( $_GET['lp_course_id'] );
+              foreach ($course->get_sections_data_arr() as $data) {
+                $data['resourceid'] = $data['section_id'];
+                $data['title'] = $data['section_name'];
+                $data["content"] = $data['section_description'];
+                $data["description"] = $data['section_description'];
+                $data["pageurl"] = $data['section_name'];
+                $data["lp_course_id"] = $lp_course_id;
+                $data['lp_object'] = 'lp_section';
+                $data["lp_object_id"] = $data['section_id'];
+                $resource_collection[] = $this->prepareCollectionDataSet($data);
+              }
+              
+              $q = "SELECT * FROM {$wpdb->prefix}posts WHERE id = '" . $_GET['lp_course_id'] . "'";
+              $course_row = $wpdb->get_row($q);
+              $data = (array) $course_row;
+              $data["resourcetype"] = 'collection';
+              $data["post_title"] = $course_row->post_title;
+              $lp_object = $_GET['lp_object'];
+              $lp_object_id = $_GET['lp_object_id'];
+              $lp_course_id = $_GET['lp_course_id'];
+              $data["lp_object"] = $lp_object;
+              $data["lp_object_id"] = $lp_object_id;
+              $data["lp_course_id"] = $lp_course_id;
+              $resource_obj = (object) $this->prepareResourceDataSet($data);
+              $r_data = array(
+                  "resource" => $resource_obj,
+                  "collections" => $resource_collection
+              );
+              $resources_table_of_content->main_resource_resources = $r_data;
+              $toc_persist[] = $resources_table_of_content;
+              $resource = array_merge($resource, array('toc_persist' => $toc_persist));
+              $resource = array_merge($resource, array('toc_persist_rids' => $toc_persist_rids)); 
+            } else if ( isset($_GET['lp_object']) && $_GET['lp_object'] === 'lp_lesson' && $rid_to_fetech_collection != $_GET['lp_course_id'] ) {
+                $resource_collection = [];
+                $course = learn_press_get_course( $_GET['lp_course_id'] );
+                $sections = $course->get_sections_data_arr();
+                $section = array_filter($sections, function($section) use ($rid_to_fetech_collection) {
+                  return $section['section_id'] == $rid_to_fetech_collection;
+                });
+                $section = array_shift($section);
+
+                foreach ($section['items'] as $section_lesson) {
+                  $q = "SELECT * FROM {$wpdb->prefix}posts WHERE id = '" . $section_lesson->id . "'";
+                  $lesson_row = $wpdb->get_row($q);
+                  $data['resourceid'] = $lesson_row->ID;
+                  $data['title'] = $lesson_row->post_title;
+                  $data["content"] = $lesson_row->post_content;
+                  $data["description"] = $lesson_row->post_content;
+                  $data["pageurl"] = $lesson_row->post_name;
+                  $data["lp_course_id"] = $lp_course_id;
+                  $data['lp_object'] = 'lp_lesson';
+                  $data["lp_object_id"] = $lp_object_id;
+                  $resource_collection[] = $this->prepareCollectionDataSet($data);
+                }
+
+                $data["resourcetype"] = 'collection';
+                $data["post_title"] = $section["section_name"];
+                $lp_object = $_GET['lp_object'];
+                $lp_object_id = $_GET['lp_object_id'];
+                $lp_course_id = $_GET['lp_course_id'];
+                $data["lp_object"] = $lp_object;
+                $data["lp_object_id"] = $lp_object_id;
+                $data["lp_course_id"] = $lp_course_id;
+                $resource_obj = (object) $this->prepareResourceDataSet($data);
+                $r_data = array(
+                    "resource" => $resource_obj,
+                    "collections" => $resource_collection
+                );
+                $resources_table_of_content->main_resource_resources = $r_data;
+                $toc_persist[] = $resources_table_of_content;
+                $resource = array_merge($resource, array('toc_persist' => $toc_persist));
+                $resource = array_merge($resource, array('toc_persist_rids' => $toc_persist_rids)); 
+                
+            }
+            
+          }
+        }
+      }
+      return $resource;
+    }
+      
   }
 
 function getPreviewResourceById($resourceid = 0, $pageurl = '', $all = false) {
@@ -438,9 +778,26 @@ function getPreviewResourceById($resourceid = 0, $pageurl = '', $all = false) {
     
     if (is_object($resource)) {
       return (array) $resource;
-    } else
-      return false;
+    } else {
+      $resource = false;
+      if (isset($_GET['pageurl'])) {
+        if (
+            isset($_GET['lp_object']) && $_GET['lp_object'] != ''
+            && isset($_GET['lp_object_id']) && $_GET['lp_object_id'] != ''
+            && isset($_GET['lp_course_id']) && $_GET['lp_course_id'] != ''
+        ) {
+          $lp_object = $_GET['lp_object'];
+          $lp_object_id = $_GET['lp_object_id'];
+          $lp_course_id = $_GET['lp_course_id'];
+          $resource = $this->getLpPostByPageUrl($_GET['pageurl'], $lp_object, $lp_object_id, $lp_course_id);
+        } else {
+          $resource = $this->getLpPostByPageUrl($_GET['pageurl']);
+        }
+      }
+      return $resource;
+    }
   }
+
   function getResourceUserByIdForResourceViews($resourceid = 0, $pageurl = '') {
     global $wpdb;
 

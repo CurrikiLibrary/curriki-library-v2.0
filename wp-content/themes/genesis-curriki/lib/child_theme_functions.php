@@ -150,6 +150,7 @@ EOD;
 
 $menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/groups" itemprop="url"><span itemprop="name">Groups</span></a></li>';
 $menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/members" itemprop="url"><span itemprop="name">Members</span></a></li>';
+$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/courses" itemprop="url"><span itemprop="name">Courses</span></a></li>';
 //        return $menu;
     $menu .= '<li class="right search">' . $search . '</li>';
 

@@ -1306,6 +1306,14 @@ function curriki_resource_page_body() {
                             foreach ($table_of_content->main_resource_resources["collections"] as $collection) {
                                 $url_toc = get_bloginfo('url') . '/oer/' . $collection['pageurl'] . '/?mrid=' . $mrid;
                                 $url_toc .= isset($_GET['oer-only']) && $_GET['oer-only'] == 'true' ? '&oer-only=true':'';
+
+                                if (
+                                    isset($collection["lp_object"]) && $collection["lp_object"] !== ''
+                                    && isset($collection["lp_object_id"]) && $collection["lp_object_id"] > 0
+                                    && isset($collection["lp_course_id"]) && $collection["lp_course_id"] > 0
+                                ) {
+                                    $url_toc .= "&lp_object=" . $collection["lp_object"] . "&lp_object_id=" . $collection["lp_object_id"] . "&lp_course_id=" . $collection["lp_course_id"];
+                                }
                                 $resource_content .= '<li><a href="' . $url_toc . '"><i class="fa fa-file-text"></i> ' . htmlentities($collection['title']) . '</a></li>';
                             }
                             $resource_content .= '</ul>';
@@ -1325,6 +1333,13 @@ function curriki_resource_page_body() {
                     foreach ($resource['collection'] as $collection) {
                         $url_toc = get_bloginfo('url') . '/oer/' . $collection['pageurl'] . "/?mrid=" . $mrid;
                         $url_toc .= isset($_GET['oer-only']) && $_GET['oer-only'] == 'true' ? '&oer-only=true':'';
+                        if (
+                            isset($collection["lp_object"]) && $collection["lp_object"] !== ''
+                            && isset($collection["lp_object_id"]) && $collection["lp_object_id"] > 0
+                            && isset($collection["lp_course_id"]) && $collection["lp_course_id"] > 0
+                        ) {
+                            $url_toc .= "&lp_object=" . $collection["lp_object"] . "&lp_object_id=" . $collection["lp_object_id"] . "&lp_course_id=" . $collection["lp_course_id"];
+                        }
                         $resource_content .= '<li><a href="' . $url_toc . '"><i class="fa fa-file-text"></i> ' . htmlentities($collection['title']) . '</a></li>';
                     }
                     $resource_content .= '</ul>';
@@ -1510,6 +1525,15 @@ function curriki_resource_page_body() {
         foreach ($resource['collection'] AS $collection) {
             $url = get_bloginfo('url') . '/oer/' . $collection['pageurl'];
             $url .= "/?mrid=" . $mrid;
+            
+            if (
+                isset($collection["lp_object"]) && $collection["lp_object"] !== ''
+                && isset($collection["lp_object_id"]) && $collection["lp_object_id"] > 0
+                && isset($collection["lp_course_id"]) && $collection["lp_course_id"] > 0
+            ) {
+                $url .= "&lp_object=" . $collection["lp_object"] . "&lp_object_id=" . $collection["lp_object_id"] . "&lp_course_id=" . $collection["lp_course_id"];
+            }
+
             $url .= isset($_GET['oer-only']) && $_GET['oer-only'] == 'true' ? '&oer-only=true':'';
 
             $content = htmlentities((!empty($collection['description'])) ? $collection['description'] : $collection['content']);

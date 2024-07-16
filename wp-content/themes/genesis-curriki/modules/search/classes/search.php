@@ -481,6 +481,96 @@ class search {
                 $this->response[] = $row;
             }
         }
+
+        // split the phrase by space and make second array version with lower case
+        $phrase = [$this->request["phrase"]];
+        $phrase_lower = array_map('strtolower', $phrase);
+
+        // merge the two arrays with the unique values
+        $phrase = array_unique(array_merge($phrase, $phrase_lower));
+        
+        // iterate over the phrase array and create the query string
+        $lp_query = "";
+        foreach ($phrase as $key => $value) {
+            if ($value) {
+                $lp_query .= "post_title LIKE '%".$value."%' OR post_content LIKE '%".$value."%'";
+                if($key < count($phrase) - 1){
+                    $lp_query .= " OR ";
+                }   
+            }
+        }
+
+        if ($lp_query) {
+            global $wpdb;
+            $lp_posts = $wpdb->get_results("SELECT id, post_name, post_title, post_content, post_type FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'lp_course' OR post_type = 'lp_lesson') AND ($lp_query) limit 1000", ARRAY_A);
+        }
+
+        // map $lp_posts to the response array being an object.
+        $lp_response = [];
+        foreach ($lp_posts as $key => $value) {
+            // $lp_description with value of post_content without html tags and removing css code with <style> tags as well. And with top 500 characters.            
+            $lp_description = strip_tags(substr($value['post_content'], 0, 900));
+            $lp_description = strip_tags(preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', '', $lp_description));
+            $lp_description = strip_tags(preg_replace('/\s*[^{}]+\{[^{}]*\}\s*/', '', $lp_description));
+
+            $resourcetype = 'collection';
+            if ($value['post_type'] === 'lp_lesson') {
+                $resourcetype = 'resource';
+            }
+
+            $lp_row = [];
+            $lp_row['url'] = 'oer/' . $value['post_name'];
+            $lp_row['title'] = $value['post_title'];
+            $lp_row['description'] = $lp_description;
+            $lp_row['content'] = $value['post_content'];
+            $lp_row['keywords'] = "";
+            $lp_row['resourcetype'] = $resourcetype;
+            $lp_row['fullname'] = "Curriki Learn";
+            $lp_row['avatarfile'] = "5dd4114fbc1c1.jpg";
+            $lp_row['memberrating'] = "0.0";
+            $lp_row['reviewrating'] = "0.0";
+            $lp_row['language'] = "eng";
+            $lp_row['license'] = "CC BY-NC-SA";
+            $lp_row['mediatype'] = "external";
+            $lp_row['reviewstatus'] = "none";
+            $lp_row['createdate'] = "2024-07-11T09:07:59Z";
+            $lp_row['resourceviews'] = "0";
+            $lp_row['collections'] = "0";
+            $lp_row['licensename'] = "CC BY-NC-SA";
+            $lp_row['licenseurl'] = "http://creativecommons.org/licenses/by-nc-sa/4.0/";
+            $lp_row['usernicename'] = "eprofessor";
+            $lp_row['subject'] = ["Science"];
+            $lp_row['subsubjectarea'] = ["Science > General", "Science > Technology"];
+            $lp_row['topofsearch'] = "F";
+            $lp_row['aligned'] = "F";
+            $lp_row['currikilicense'] = "F";
+            $lp_row['partner'] = "F";
+            $lp_row['resourcechecked'] = "F";
+            $lp_row['studentfacing'] = "F";
+            $lp_row['id'] = $value['id'];
+            $lp_row['contributorid'] = "536252";
+            $lp_row['rank1'] = "0";
+            $lp_row['lp_object'] = $value['post_type'];
+            $lp_row['lp_object_id'] = $value['id'];
+            
+
+            if ( isset($_GET['resourcetype']) && ($_GET['resourcetype'] === 'collection' && $resourcetype === 'collection')) {
+                $lp_response[] = $lp_row;
+            } else if ( isset($_GET['resourcetype']) && ($_GET['resourcetype'] === 'resource' && $resourcetype === 'resource')) {
+                $lp_response[] = $lp_row;
+            } else if ( !isset($_GET['resourcetype']) || (isset($_GET['resourcetype']) && $_GET['resourcetype'] === '') ) {
+                $lp_response[] = $lp_row;
+            }            
+        }
+
+        // prepend $lsp_response to $this->response if $lp_response is not empty
+        if ($lp_response) {
+            $this->response = array_merge($lp_response, $this->response);
+            // set $response->status->found to the sum of $response->status->found and count($lp_response)
+            $this->status['found'] += count($lp_response);
+        }
+        
+
         if(isset($_REQUEST['output']) && $_REQUEST['output'] === 'json'){
             header('Content-Type: application/json');
             $response = new stdClass();
