@@ -24,3 +24,6 @@
 !/wp-content/plugins/curriki-manage-groups/
 !/wp-content/plugins/curriki-recommender/
 !/wp-content/plugins/curriki-site/
+
+wp-content/plugins/curriki_manage/lib/googleanalytics/*.json
+wp-content/plugins/curriki_manage/lib/googleanalytics/vendor/google/auth/tests/fixtures/*.pem
