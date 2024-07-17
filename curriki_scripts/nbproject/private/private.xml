@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/inc/Conn.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/ASNJurisdictionStandards.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/upload_resources.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/check_avatars.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/PHPExcel/PHPExcel/Reader/Excel2007.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/index.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/inc/Sync.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/deleteresource.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/checkCloudSearchResources.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/changeStructureQuestions.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/ASNJurisdictionStatements.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/viewlinks.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/aws_sdk/Aws/Ec2/Resources/ec2-2014-10-01.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/upload_images.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/upload_thinkfinity.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/upsert_standards_statements.php</file>
+            <file>file:/usr/share/nginx/html/currikiwordpress/curriki2/trunk/curriki/curriki_scripts/inc/autoload.php</file>
+        </group>
+    </open-files>
+</project-private>
