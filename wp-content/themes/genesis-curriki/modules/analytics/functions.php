@@ -11,6 +11,10 @@ function curr_log_visits() {
     global $wpdb;
 
     $ip_client = $_SERVER["HTTP_X_FORWARDED_FOR"];
+    if (!$ip_client) {
+        return false;
+    }
+    
     $host_name = gethostbyaddr($ip_client);
 
     $host_name_arr = explode(".", $host_name);
