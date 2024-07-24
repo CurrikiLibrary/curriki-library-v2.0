@@ -25,6 +25,7 @@ function curriki_theme_menu_extras($menu, $args) {
     if ('primary' !== $args->theme_location)
         return $menu;
 
+    $site_url = site_url();
     //* Uncomment this block to add a search form to the navigation menu
     ob_start();
     curriki_search_bar();
@@ -34,11 +35,12 @@ function curriki_theme_menu_extras($menu, $args) {
     $search_url = $home_url.'/search?size=10&type=Resource&phrase=&language=&start=0&partnerid=1&searchall=&viewer=&branding=common&sort=rank1+desc&size=10';
     $dashboard_menu = "";
     if(is_user_logged_in()){
-        $dashboard_menu = '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/dashboard" itemprop="url"><span itemprop="name">Dashboard</span></a></li>';
+        $dashboard_menu = '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="'.$site_url.'/dashboard" itemprop="url"><span itemprop="name">Dashboard</span></a></li>';
     }
+
     $menu =<<<EOD
                 $dashboard_menu
-                    <li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487 mega-menu"><a href="/resources-curricula" itemprop="url"><span itemprop="name">Resource Library</span></a>
+                    <li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487 mega-menu"><a href="{$site_url}/resources-curricula" itemprop="url"><span itemprop="name">Resource Library</span></a>
                         <div class="sub-menu">
 							<div class="wrap container_12">
 								<div class="grid_12">
@@ -148,9 +150,9 @@ function curriki_theme_menu_extras($menu, $args) {
                 
 EOD;
 
-$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/groups" itemprop="url"><span itemprop="name">Groups</span></a></li>';
-$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/members" itemprop="url"><span itemprop="name">Members</span></a></li>';
-$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="/courses" itemprop="url"><span itemprop="name">Courses</span></a></li>';
+$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="'.$site_url.'/groups" itemprop="url"><span itemprop="name">Groups</span></a></li>';
+$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="'.$site_url.'/members" itemprop="url"><span itemprop="name">Members</span></a></li>';
+$menu .= '<li  class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-13487"><a href="'.$site_url.'/courses" itemprop="url"><span itemprop="name">Courses</span></a></li>';
 //        return $menu;
     $menu .= '<li class="right search">' . $search . '</li>';
 
