@@ -32,7 +32,14 @@
 !/ltiapp/
 !/wp-content/libs/
 
+/wp-content/libs/google/vendor/google/auth/tests/fixtures/*.json
+/wp-content/libs/google/vendor/google/auth/tests/fixtures/*.pem
+/wp-content/libs/google/vendor/google/auth/tests/fixtures/.config/gcloud/*.json
+/wp-content/libs/google/vendor/google/auth/tests/fixtures2/*.json
+/wp-content/libs/google/vendor/google/auth/tests/fixtures2/*.pem
+/wp-content/libs/google/vendor/google/auth/tests/fixtures2/.config/gcloud/*.json
+/wp-content/libs/aws_sdk/Guzzle/Http/Resources/*.pem
+
 wp-content/plugins/curriki_manage/lib/googleanalytics/*.json
 wp-content/plugins/curriki_manage/lib/googleanalytics/vendor/google/auth/tests/fixtures/*.pem
 wp-content/plugins/curriki_manage/lib/googleanalytics/vendor/google/auth/tests/fixtures/*.json
-curriki_scripts/aws_sdk/config.php
