@@ -21,7 +21,7 @@ if ($_SERVER['HTTP_HOST'] == 'cg.curriki.org') {
   $db_user = DB_USER;
   $db_pass = DB_PASSWORD;
   $db_name = DB_NAME;
-  $vars['wp_contents'] = $_SERVER['REQUEST_URI'] . 'wp-content';
+  $vars['wp_contents'] = LOCAL_PROJECT_PATH . '/wp-content';
 } else {
   $db_host = DB_HOST;
   $db_user = DB_USER;
