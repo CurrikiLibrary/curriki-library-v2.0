@@ -27,6 +27,7 @@ $forum_id = count($forum_ids) > 0 ? $forum_ids[0] : 0;
 $forum_count = $wpdb->get_var("SELECT count(ID) FROM {$wpdb->prefix}posts where post_type = 'topic' AND post_status = 'publish' AND post_parent = $forum_id");
 
 // ======== [start] Manage Add to resource/collection buttons ==========
+    $group_member_record = array();
     if( get_current_user_id() > 0)
     {
         $is_user_member_of_group = false;
@@ -49,7 +50,7 @@ $forum_count = $wpdb->get_var("SELECT count(ID) FROM {$wpdb->prefix}posts where 
                         cbg.id = $group_id                    
                         and cbgm.user_id = $user_id
                         and is_banned = 0";
-        $group_member_record = $wpdb->get_results($sql_btn);        
+        $group_member_record = $wpdb->get_results($sql_btn); 
     }
 // ======== [end] Manage Add to resource/collection buttons ==========    
 ?>

@@ -14,7 +14,7 @@ class search {
     public $current_language = "eng";
 
     //Constructor
-    public function search() {
+    public function __construct() {
         global $wpdb;
         $this->wpdb = $wpdb;
         $this->request = array_merge($this->request, $_GET);
@@ -463,7 +463,7 @@ class search {
                         $row[$p['name']] = isset($value['fields'][$p['name']]) ? $value['fields'][$p['name']] : $p['value'];
                         if (is_array($row[$p['name']]))
                             $row[$p['name']] = array_unique($row[$p['name']]);
-                    } elseif(count($value['fields'][$p['name']]) > 0) {
+                    } elseif (isset($value['fields'][$p['name']]) && is_array($value['fields'][$p['name']]) && count($value['fields'][$p['name']]) > 0) {
                         $row[$p['name']] = isset($value['fields'][$p['name']]) ? $value['fields'][$p['name']] : $p['value'];
                         if (is_array($row[$p['name']]))
                             $row[$p['name']] = array_unique($row[$p['name']]);

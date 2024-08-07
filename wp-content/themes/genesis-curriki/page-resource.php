@@ -1239,7 +1239,7 @@ function curriki_resource_page_body() {
                                             $resource_content .= '<label>'.__('Collections','curriki').':</label>';
                                             $resource_content .= '<div class="desc">';
             
-                                            if (count($resource['collections_resource_blogngs_to']) == 0) {
+                                            if (isset($resource['collections_resource_blogngs_to']) && count($resource['collections_resource_blogngs_to']) == 0) {
                                                 $resource_content .= "None";
                                             }
             
