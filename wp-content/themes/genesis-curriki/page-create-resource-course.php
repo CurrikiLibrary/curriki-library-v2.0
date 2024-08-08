@@ -453,7 +453,7 @@ function curriki_create_resource_body() {
                                     }
                                     ?>" />
                                 <!--Resource Description -->
-                                <div style="display:none;">
+                                
                                 <h4><?php echo __('Abstract', 'curriki'); ?></h4><div class = "tooltip fa fa-question-circle" id = "resource-description"></div>
                                 <p>
                                     <?php
@@ -467,14 +467,12 @@ function curriki_create_resource_body() {
                                     ?>                                     
                                 </p>
                                 
-                                <textarea readonly name="description" id="description"><?php 
+                                <textarea name="description" id="description"><?php 
                                         if (isset($resource)) {
                                             echo $resource['description']; 
-                                        } else if ($selected_course_post) {
-                                            echo trim($selected_course_post->post_content);
                                         }
                                     ?></textarea>
-                                </div>
+                                
                                 <div style="display:none;">
                                 <?php
                                     // if(get_current_user_id() > 0){
@@ -511,6 +509,7 @@ function curriki_create_resource_body() {
 
                                 <br />
                                 <h4><?php echo __('Contents', 'curriki'); ?></h4>
+                                <p>Read Only</p>
                                 <!-- <p><?php //echo __('Enter your lesson, student material, etc. in the editor below.', 'curriki'); ?></p> -->
                                 <textarea readonly id="elm1" name="content"><?php 
                                     if (isset($resource['content'])) {
