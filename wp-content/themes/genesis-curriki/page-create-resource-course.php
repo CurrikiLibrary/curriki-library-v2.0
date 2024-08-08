@@ -8,6 +8,9 @@
  * 
  * 
  */
+
+include_once __DIR__ . '/modules/resource-course/create/functions.php';
+ 
 // Add custom body class to the head
 if (!is_user_logged_in() and function_exists('curriki_redirect_login')) {
     curriki_redirect_login();
@@ -295,6 +298,14 @@ function curriki_create_resource_body() {
 
     $q_subjectareas = cur_subjectareas_query($current_language, null);
     $subjectareas = $wpdb->get_results($q_subjectareas, ARRAY_A);
+
+    $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
+    $selected_course = null;
+    $selected_course_post = null;
+    if ($course_id > 0) {
+        $selected_course = loadCourse($course_id);
+        $selected_course_post = loadCoursePost($selected_course);
+    }
     ?>
     <div id="resource-tabs" class="container_12" ng-app="ngApp" ng-controller="createResourceCtrl" ng-init="baseurl = '<?php echo get_bloginfo('url'); ?>/';
                         ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';">
@@ -349,8 +360,7 @@ function curriki_create_resource_body() {
             <div class="create-resource-content resource-content clearfix"><div class="wrap grid_12">
                     <!-- Create -->
                     <div id="create" class="tab-contents">
-                        <h3 class="section-header">
-                            <?php
+                        <?php
                             $cedit = 'Create or Upload';
                             if (isset($resource['resourceid']))
                                 $cedit = 'Edit';
@@ -369,9 +379,8 @@ function curriki_create_resource_body() {
                                 else
                                     $cedit .= ' a Resource';
                             }
-                            echo __($cedit, 'curriki');
-                            ?>
-                        </h3>
+                        ?>
+                        
                         <?php
                         if (isset($_GET['prid']) && $_REQUEST['type'] == 'collection') {
                             echo '<p class = "desc">' . __('You can add new content to this folder when you are finished.', 'curriki') . '</p>';
@@ -380,23 +389,71 @@ function curriki_create_resource_body() {
                         ?>
                         <div class = "create-edit-section">
                             <!--Resource Title -->
-                            <div class = "resource-content-section" ng-non-bindable><h4><?php echo __('Title', 'curriki'); ?></h4>
-                                <p class = "desc">
+                            <div class = "resource-content-section" ng-non-bindable>
+                                <h4><?php echo __('Select Course', 'curriki'); ?></h4>
+                                <p>
+                                    <?php
+                                        global $wpdb;
+                                        $courses = $wpdb->get_results("SELECT id, post_name, post_title, post_content, post_type FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'lp_course') limit 1000", ARRAY_A);
+                                    ?>
+                                    <select name="course" id="course" class="form-control" style="width: 100%">
+                                        <option value="" selected="selected">Select Course</option>
+                                        <?php
+                                            foreach ($courses as $course) {
+                                                // get course_id from URL and set selected
+                                                $selected = '';
+                                                if(isset($_REQUEST['course_id']) && $_REQUEST['course_id'] == $course['id']){
+                                                    $selected = ' selected="selected"';
+                                                }
+                                                echo '<option value="' . $course['id'] . '"' . $selected . '>' . $course['post_title'] . '</option>';
+                                            }
+                                        ?>
+                                    </select>
+                                    <script type="text/javascript">
+                                        jQuery(document).ready(function(){
+                                            jQuery('#course').change(function(){
+                                                var course_id = jQuery(this).val();
+                                                // redirect to current page with course id using URL API
+                                                var url = new URL(window.location.href);
+                                                if (course_id == '') {
+                                                    url.searchParams.delete('course_id');
+                                                } else {
+                                                    url.searchParams.set('course_id', course_id);
+                                                }
+
+                                                url.searchParams.delete('section_id');
+                                                url.searchParams.delete('lesson_id');
+                                                window.location.href = url;
+                                            });
+                                        });
+                                    </script>
+                                </p>
+                                
+                                <h3 class="section-header"><?php echo __($cedit, 'curriki'); ?></h3>
+                                <h4><?php echo __('Title', 'curriki'); ?></h4>
+                                <!-- <p class = "desc">
                                     <?php
                                     if (defined('ICL_LANGUAGE_CODE') && ICL_LANGUAGE_CODE != 'en') {
-                                        echo __('What details will best describe and present this in search results and other listings?', 'curriki');
+                                        //echo __('What details will best describe and present this in search results and other listings?', 'curriki');
                                     } else {
                                         ?>        
-                                        What details will best describe and present this <?php if (isset($_REQUEST['type'])) echo $_REQUEST['type']; ?> in search results and other listings?
+                                        What details will best describe and present this <?php // if (isset($_REQUEST['type'])) echo $_REQUEST['type']; ?> in search results and other listings?
                                         <?php
                                     }
                                     ?>                                    
-                                </p>
+                                </p> -->
                                 <?php
-                                $placeholder_title = "Enter " . ( isset($_REQUEST['type']) ? $_REQUEST['type'] : "" ) . " Title";
+                                    $placeholder_title = "Enter " . ( isset($_REQUEST['type']) ? $_REQUEST['type'] : "" ) . " Title";
                                 ?>
-                                <input type = "text" class = "resource-title" id = "resource-title"  style="max-width: 100%" name = "title" autofocus placeholder = "<?php echo __($placeholder_title, 'curriki'); ?>" value="<?php if (isset($resource['title'])) echo $resource['title']; ?>" />
+                                <input readonly type="text" class = "resource-title" id = "resource-title"  style="max-width: 100%" name = "title" autofocus placeholder = "<?php echo __($placeholder_title, 'curriki'); ?>" value="<?php 
+                                    if (isset($resource['title'])) {
+                                        echo $resource['title']; 
+                                    } else if ($selected_course_post) {
+                                        echo $selected_course_post->post_title;
+                                    }
+                                    ?>" />
                                 <!--Resource Description -->
+                                <div style="display:none;">
                                 <h4><?php echo __('Abstract', 'curriki'); ?></h4><div class = "tooltip fa fa-question-circle" id = "resource-description"></div>
                                 <p>
                                     <?php
@@ -410,7 +467,15 @@ function curriki_create_resource_body() {
                                     ?>                                     
                                 </p>
                                 
-                                <textarea name = "description" id="description" ><?php if (isset($resource)) echo $resource['description']; ?></textarea>
+                                <textarea readonly name="description" id="description"><?php 
+                                        if (isset($resource)) {
+                                            echo $resource['description']; 
+                                        } else if ($selected_course_post) {
+                                            echo trim($selected_course_post->post_content);
+                                        }
+                                    ?></textarea>
+                                </div>
+                                <div style="display:none;">
                                 <?php
                                     // if(get_current_user_id() > 0){
                                     //     $current_user = wp_get_current_user();
@@ -442,10 +507,18 @@ function curriki_create_resource_body() {
                                     // }
 
                                 ?>
-                                
+                                </div>
+
+                                <br />
                                 <h4><?php echo __('Contents', 'curriki'); ?></h4>
-                                <p><?php echo __('Enter your lesson, student material, etc. in the editor below.', 'curriki'); ?></p>
-                                <textarea id = "elm1" name = "content" ><?php if (isset($resource['content'])) echo $resource['content']; ?></textarea>
+                                <!-- <p><?php //echo __('Enter your lesson, student material, etc. in the editor below.', 'curriki'); ?></p> -->
+                                <textarea readonly id="elm1" name="content"><?php 
+                                    if (isset($resource['content'])) {
+                                        echo $resource['content']; 
+                                    } else if ($selected_course_post) {
+                                        echo trim($selected_course_post->post_content);
+                                    }
+                                ?></textarea>
                             </div>
                         </div>
                         <div class = "create-edit-steps">

@@ -242,7 +242,17 @@ tinymce.init({
 });
 
 
-
+jQuery(document).ready(function () {
+    if (window.location.pathname == '/create-resource-course/') {
+        // do tinymce.get('elm1').setMode('readonly'); using set interval untill tinymce.get('elm1') returns the not null value
+        var interval = setInterval(function () {
+            if (tinymce.get('elm1')) {
+                tinymce.get('elm1').setMode('readonly');
+                clearInterval(interval);
+            }
+        }, 100);
+    }
+});
 
 
 function change_tab($tab) {

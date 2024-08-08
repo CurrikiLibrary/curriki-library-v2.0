@@ -932,7 +932,7 @@ function curriki_resource_page_body() {
 
         $information_tab .= '<div class="information-section">';
         $information_tab .= '<h4 class="resource-subheadline">'.__('Collections','curriki').':</h4>';
-        if (count($resource['collections_resource_blogngs_to']) == 0) {
+        if (isset($resource['collections_resource_blogngs_to']) && count($resource['collections_resource_blogngs_to']) == 0) {
             $information_tab .= "None";
         }
 
