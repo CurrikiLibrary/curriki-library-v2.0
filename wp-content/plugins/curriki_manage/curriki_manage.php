@@ -589,7 +589,8 @@ function ajax_create_resource() {
     $newDom = new DOMDocument();
     libxml_use_internal_errors(TRUE); //disable libxml errors
 
-    $newDom->loadHTML(mb_convert_encoding($contents, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    // $newDom->loadHTML(mb_convert_encoding($contents, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    $newDom->loadHTML(htmlentities($contents, ENT_QUOTES, 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     
     libxml_clear_errors();
 
