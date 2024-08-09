@@ -4,8 +4,8 @@
  * Plugin URI: http://curriki.org
  * Description: Managing stuff outside wordpress
  * Version: The plugin's version number. 1.0.0
- * Author: Furqan Aziz
- * Author URI: https://plus.google.com/u/1/117186528930994951156/posts
+ * Author: Waqar Muneer
+ * Author URI: https://github.com/i-do-dev
  */
 /*
   ----------Add Following capabilities to the AAM plugin-----------
@@ -2561,3 +2561,9 @@ function ajax_load_admin_featureditems_ml() {
 $dir = __DIR__;
 require_once($dir . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'partners/init' . '.php');    
 require_once($dir . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'moderate/init' . '.php');    
+require_once($dir . DIRECTORY_SEPARATOR . 'functions' . DIRECTORY_SEPARATOR . 'init' . '.php');    
+
+// Hook into plugin activation
+if (function_exists('curriki_manage_db_setup')) {
+    register_activation_hook(__FILE__, 'curriki_manage_db_setup');
+}
