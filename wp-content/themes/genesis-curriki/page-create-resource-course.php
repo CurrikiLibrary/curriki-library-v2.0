@@ -301,10 +301,11 @@ function curriki_create_resource_body() {
 
     $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
     $selected_course = null;
-    $selected_course_post = null;
+    $selected_course_object_post = null;
     if ($course_id > 0) {
         $selected_course = loadCourse($course_id);
-        $selected_course_post = loadCoursePost($selected_course);
+        global $selected_course_object_post;
+        $selected_course_object_post = loadCoursePost($selected_course);
     }
     ?>
     <div id="resource-tabs" class="container_12" ng-app="ngApp" ng-controller="createResourceCtrl" ng-init="baseurl = '<?php echo get_bloginfo('url'); ?>/';
@@ -390,6 +391,7 @@ function curriki_create_resource_body() {
                         <div class = "create-edit-section">
                             <!--Resource Title -->
                             <div class = "resource-content-section" ng-non-bindable>
+                                <?php $courseSelectedObjects = null; ?>
                                 <h4><?php echo __('Select Course', 'curriki'); ?></h4>
                                 <p>
                                     <?php
@@ -428,9 +430,18 @@ function curriki_create_resource_body() {
                                         });
                                     </script>
                                 </p>
+
+                                <?php resourceCourseFilter(); ?>
                                 
+                                <?php
+                                    global $courseSelectedObjects;
+                                    if ($courseSelectedObjects) {
+                                        $courseSelectedObjectsStr = ucfirst($courseSelectedObjects);
+                                        $cedit = $cedit . " ($courseSelectedObjectsStr)";   
+                                    }
+                                ?>
                                 <h3 class="section-header"><?php echo __($cedit, 'curriki'); ?></h3>
-                                <h4><?php echo __('Title', 'curriki'); ?></h4>
+                                <h4><?php echo __('Title', 'curriki'); ?> (Read Only)</h4>
                                 <!-- <p class = "desc">
                                     <?php
                                     if (defined('ICL_LANGUAGE_CODE') && ICL_LANGUAGE_CODE != 'en') {
@@ -446,10 +457,11 @@ function curriki_create_resource_body() {
                                     $placeholder_title = "Enter " . ( isset($_REQUEST['type']) ? $_REQUEST['type'] : "" ) . " Title";
                                 ?>
                                 <input readonly type="text" class = "resource-title" id = "resource-title"  style="max-width: 100%" name = "title" autofocus placeholder = "<?php echo __($placeholder_title, 'curriki'); ?>" value="<?php 
+                                    global $selected_course_object_post;
                                     if (isset($resource['title'])) {
                                         echo $resource['title']; 
-                                    } else if ($selected_course_post) {
-                                        echo $selected_course_post->post_title;
+                                    } else if ($selected_course_object_post) {
+                                        echo $selected_course_object_post->post_title;
                                     }
                                     ?>" />
                                 <!--Resource Description -->
@@ -508,14 +520,14 @@ function curriki_create_resource_body() {
                                 </div>
 
                                 <br />
-                                <h4><?php echo __('Contents', 'curriki'); ?></h4>
-                                <p>Read Only</p>
+                                <h4><?php echo __('Contents', 'curriki'); ?> (Read Only)</h4>
                                 <!-- <p><?php //echo __('Enter your lesson, student material, etc. in the editor below.', 'curriki'); ?></p> -->
                                 <textarea readonly id="elm1" name="content"><?php 
+                                    global $selected_course_object_post;
                                     if (isset($resource['content'])) {
                                         echo $resource['content']; 
-                                    } else if ($selected_course_post) {
-                                        echo trim($selected_course_post->post_content);
+                                    } else if ($selected_course_object_post) {
+                                        echo trim($selected_course_object_post->post_content);
                                     }
                                 ?></textarea>
                             </div>

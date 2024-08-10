@@ -1,12 +1,15 @@
 <?php
 // coruse oer create functions
 
-function editOerCourseFilter() : void {
+function resourceCourseFilter() : void {
+    global $wpdb;
 ?>
                                     
     <?php
         $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
         if ($course_id > 0) {
+            global $courseSelectedObjects;
+            $courseSelectedObjects = "course";
             $course = learn_press_get_course( $course_id );
             $sections = $course->get_sections_data_arr();
     ?>
@@ -50,11 +53,20 @@ function editOerCourseFilter() : void {
         $section_id = isset($_REQUEST['section_id']) ? $_REQUEST['section_id'] : 0;
         $lessons = array();
         if ($section_id > 0) {
+            global $courseSelectedObjects;
+            $courseSelectedObjects = "section";
             // filter $sections array to get current section by "section_id" key.
             $current_section = array_filter($sections, function($section) use ($section_id) {
                 return $section['section_id'] == $section_id;
             });
             $current_section = count($current_section) > 0 ? array_values($current_section)[0] : array();
+            
+            global $selected_course_object_post;
+            $section_object = new stdClass();
+            $section_object->post_title = $current_section['section_name'];
+            $section_object->post_content = $current_section['section_description'];
+            $selected_course_object_post = $section_object;
+            
             $lessons = array_filter($current_section['items'], function($item) {
                 return $item->type == 'lp_lesson';
             });
@@ -63,6 +75,18 @@ function editOerCourseFilter() : void {
             $lesson_ids = array_map(function($lesson) { return $lesson->id; }, $lessons);
             $lesson_ids = implode(',', $lesson_ids);
             $lessons = $wpdb->get_results("SELECT id, post_name, post_title, post_content, post_type FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'lp_lesson') AND ID IN ({$lesson_ids})", ARRAY_A);
+        }
+
+        if (count($lessons) > 0 && isset($_GET['lesson_id'])) {
+            global $courseSelectedObjects;
+            $courseSelectedObjects = "lesson";
+            global $selected_course_object_post;
+            // filter $lessons based on $_GET['lesson_id']
+            $current_lesson_id = $_GET['lesson_id'];
+            $current_lesson = array_values( array_filter($lessons, function ($lesson_record) use ($current_lesson_id) {
+                return $lesson_record["id"] == $current_lesson_id;
+            }) );
+            $selected_course_object_post = is_array($current_lesson) && count($current_lesson) > 0 ? get_post($current_lesson[0]['id']) : null;
         }
 
         if (count($lessons) > 0) {
