@@ -10,3 +10,4 @@ require_once __DIR__.'/user_deactivation/init.php';
 require_once __DIR__.'/imports/functions.php';
 require_once __DIR__.'/recomender/helper.php';
 require_once __DIR__.'/lti/index.php';
+require_once __DIR__.'/create_course_oer.php';

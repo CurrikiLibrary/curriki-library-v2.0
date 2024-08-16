@@ -75,7 +75,7 @@ function curriki_create_resource_scripts() {
     wp_enqueue_script('tinymce', get_stylesheet_directory_uri() . '/js/tinymce_4.3.2_jquery/tinymce.min.js', array('ng-ctrlr'), false, true);
 
     //Angular and Custom JS Script Loaded
-    wp_register_script('ng-ctrlr', get_stylesheet_directory_uri() . '/js/angular_controllers.js?v=1');
+    wp_register_script('ng-ctrlr', get_stylesheet_directory_uri() . '/js/angular_controllers_course_oer.js?v=1');
     $translation_array = cur_angular_controllers_translations();
     wp_localize_script('ng-ctrlr', 'ml_obj', $translation_array);
     wp_enqueue_script("ng-ctrlr");
@@ -333,7 +333,7 @@ function curriki_create_resource_body() {
 
         <form action="" method="" id="create_resource_form" >
             <input type="hidden" name="preview_resource_id" value="0" />
-            <input type="hidden" name="action" value="create_resource" />
+            <input type="hidden" name="action" value="create_resource_course" />
             <input type="hidden" name="groupid" value="<?php if (isset($_GET['groupid'])) echo $_GET['groupid'] ?>" />
             <input type="hidden" name="prid" value="<?php if (isset($_GET['prid'])) echo $_GET['prid'] ?>" />
             <input type="hidden" name="mediatype" value="<?php echo (isset($resource['mediatype'])) ? $resource['mediatype'] : 'text'; ?>" id="frmmediatype" />
@@ -387,11 +387,13 @@ function curriki_create_resource_body() {
                             echo '<p class = "desc">' . __('You can add new content to this folder when you are finished.', 'curriki') . '</p>';
                         }
                         $_REQUEST['type'] = ucwords($_REQUEST['type']);
+
+                        setCourseObjectType();
                         ?>
                         <div class = "create-edit-section">
                             <!--Resource Title -->
                             <div class = "resource-content-section" ng-non-bindable>
-                                <?php $courseSelectedObjects = null; ?>
+                                <?php $courseSelectedObject = null; ?>
                                 <h4><?php echo __('Select Course', 'curriki'); ?></h4>
                                 <p>
                                     <?php
@@ -431,15 +433,20 @@ function curriki_create_resource_body() {
                                     </script>
                                 </p>
 
-                                <?php resourceCourseFilter(); ?>
-                                
-                                <?php
-                                    global $courseSelectedObjects;
-                                    if ($courseSelectedObjects) {
-                                        $courseSelectedObjectsStr = ucfirst($courseSelectedObjects);
-                                        $cedit = $cedit . " ($courseSelectedObjectsStr)";   
+                                <?php 
+                                    if (resourceCourseExist()) {
+                                        resourceCourseFilter();    
                                     }
                                 ?>
+                                
+                                <?php
+                                    global $courseSelectedObject;
+                                    if ($courseSelectedObject) {
+                                        $courseSelectedObjectStr = ucfirst($courseSelectedObject);
+                                        $cedit = $cedit . " ($courseSelectedObjectStr)";   
+                                    }
+                                ?>
+                                <input type="hidden" name="course_object_type" id="course_object_type" value="<?php echo $courseSelectedObject; ?>" />
                                 <h3 class="section-header"><?php echo __($cedit, 'curriki'); ?></h3>
                                 <h4><?php echo __('Title', 'curriki'); ?> (Read Only)</h4>
                                 <!-- <p class = "desc">

@@ -1,5 +1,26 @@
 <?php
-// coruse oer create functions
+
+function setCourseObjectType() {
+    $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
+    if ($course_id > 0) {
+        global $courseSelectedObject;
+        $courseSelectedObject = "course";
+    }
+
+    $section_id = isset($_REQUEST['section_id']) ? $_REQUEST['section_id'] : 0;
+    if ($section_id > 0) {
+        global $courseSelectedObject;
+        $courseSelectedObject = "section";
+    }
+
+    $lesson_id = isset($_REQUEST['lesson_id']) ? $_REQUEST['lesson_id'] : 0;
+    if ($lesson_id > 0) {
+        global $courseSelectedObject;
+        $courseSelectedObject = "lesson";
+    }
+}
+
+// course oer create functions
 
 function resourceCourseFilter() : void {
     global $wpdb;
@@ -8,8 +29,8 @@ function resourceCourseFilter() : void {
     <?php
         $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
         if ($course_id > 0) {
-            global $courseSelectedObjects;
-            $courseSelectedObjects = "course";
+            // global $courseSelectedObject;
+            // $courseSelectedObject = "course";
             $course = learn_press_get_course( $course_id );
             $sections = $course->get_sections_data_arr();
     ?>
@@ -53,8 +74,8 @@ function resourceCourseFilter() : void {
         $section_id = isset($_REQUEST['section_id']) ? $_REQUEST['section_id'] : 0;
         $lessons = array();
         if ($section_id > 0) {
-            global $courseSelectedObjects;
-            $courseSelectedObjects = "section";
+            // global $courseSelectedObject;
+            // $courseSelectedObject = "section";
             // filter $sections array to get current section by "section_id" key.
             $current_section = array_filter($sections, function($section) use ($section_id) {
                 return $section['section_id'] == $section_id;
@@ -78,8 +99,8 @@ function resourceCourseFilter() : void {
         }
 
         if (count($lessons) > 0 && isset($_GET['lesson_id'])) {
-            global $courseSelectedObjects;
-            $courseSelectedObjects = "lesson";
+            // global $courseSelectedObject;
+            // $courseSelectedObject = "lesson";
             global $selected_course_object_post;
             // filter $lessons based on $_GET['lesson_id']
             $current_lesson_id = $_GET['lesson_id'];
@@ -126,5 +147,18 @@ function resourceCourseFilter() : void {
         }
     ?>
 <?php    
+}
+
+function resourceCourseExist() : bool {
+    $ok = false;
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'resources_courses';
+    // check if record exists in the table based on course_id
+    $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
+    $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id", ARRAY_A);
+    if ($wpdb->num_rows > 0) {
+        $ok = true;
+    }
+    return $ok;
 }
 ?>
