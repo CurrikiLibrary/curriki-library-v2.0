@@ -139,6 +139,7 @@ function curriki_create_resource_scripts() {
 }
 
 function curriki_create_resource_body() {
+    $courseObjectResourceExist = courseObjectResourceExist();
     global $wpdb;
     $current_language = "eng";
     if (defined('ICL_LANGUAGE_CODE'))
@@ -338,8 +339,8 @@ function curriki_create_resource_body() {
             <input type="hidden" name="prid" value="<?php if (isset($_GET['prid'])) echo $_GET['prid'] ?>" />
             <input type="hidden" name="mediatype" value="<?php echo (isset($resource['mediatype'])) ? $resource['mediatype'] : 'text'; ?>" id="frmmediatype" />
             <input type="hidden" name="resource_type" value="<?php echo strtolower($_REQUEST['type']); ?>" />
-            <input type="hidden" name="resourceid" id="resourceid"  value="{{resourceid}}" ng-model="resourceid" ng-init="resourceid = '<?php echo (!isset($_REQUEST['copy']) && isset($resource['resourceid'])) ? $resource['resourceid'] : ''; ?>'"/>
-
+            <!-- <input type="hidden" name="resourceid" id="resourceid"  value="{{resourceid}}" ng-model="resourceid" ng-init="resourceid = '<?php // echo (!isset($_REQUEST['copy']) && isset($resource['resourceid'])) ? $resource['resourceid'] : ''; ?>'"/> -->
+            <input type="hidden" name="resourceid" id="resourceid"  value="" />
             <?php
             if (isset($resourcefiles) and count($resourcefiles) > 0)
                 foreach ($resourcefiles as $file)
@@ -349,7 +350,7 @@ function curriki_create_resource_body() {
                 echo '<span style="color: red;background-color: #FFDDDD;padding: 5px 15px;border: solid 2px red;margin-bottom: 20px;border-radius: 5px;" class="grid_12">' . $msg . '</span>';
             ?>
 
-            <div class="create-resource-tabs page-tabs grid_12 clearfix">
+            <div class="create-resource-tabs page-tabs grid_12 clearfix <?php echo $courseObjectResourceExist ? 'hide' : '' ?>">
                 <ul>
                     <li class="rounded-borders-left"><a href="#create">1. <?php echo __('Create', 'curriki'); ?></a></li>
                     <li ><a href="#describe">2. <?php echo __('Describe', 'curriki'); ?></a></li>
@@ -391,6 +392,12 @@ function curriki_create_resource_body() {
                         setCourseObjectType();
                         ?>
                         <div class = "create-edit-section">
+                            <?php if ($courseObjectResourceExist) { ?>
+                                <p>
+                                    <!-- bootstrap Edit button -->
+                                    <button style="margin-top: 0px; width: auto;" type="button" class="btn btn-success btn-lg"><i class="fa fa-pencil-square"></i> Edit</button>
+                                </p>
+                            <?php } ?>
                             <!--Resource Title -->
                             <div class = "resource-content-section" ng-non-bindable>
                                 <?php $courseSelectedObject = null; ?>
@@ -434,7 +441,8 @@ function curriki_create_resource_body() {
                                 </p>
 
                                 <?php 
-                                    if (resourceCourseExist()) {
+                                    // if ($courseObjectResourceExist) {
+                                    if ( isset($_GET['course_id']) ) {
                                         resourceCourseFilter();    
                                     }
                                 ?>
@@ -447,8 +455,12 @@ function curriki_create_resource_body() {
                                     }
                                 ?>
                                 <input type="hidden" name="course_object_type" id="course_object_type" value="<?php echo $courseSelectedObject; ?>" />
-                                <h3 class="section-header"><?php echo __($cedit, 'curriki'); ?></h3>
-                                <h4><?php echo __('Title', 'curriki'); ?> (Read Only)</h4>
+                                <h3 class="section-header">
+                                    <?php echo __($cedit, 'curriki'); ?>
+                                </h3>
+                                <h4>
+                                    <?php echo __('Title', 'curriki'); ?> (Read Only)
+                                </h4>
                                 <!-- <p class = "desc">
                                     <?php
                                     if (defined('ICL_LANGUAGE_CODE') && ICL_LANGUAGE_CODE != 'en') {
@@ -539,7 +551,13 @@ function curriki_create_resource_body() {
                                 ?></textarea>
                             </div>
                         </div>
-                        <div class = "create-edit-steps">
+                        <?php if ($courseObjectResourceExist) { ?>
+                            <p>
+                                <!-- bootstrap Edit button -->
+                                <button style="margin-top: 0px; width: auto;" type="button" class="btn btn-success btn-lg"><i class="fa fa-pencil-square"></i> Edit</button>
+                            </p>
+                        <?php } ?>
+                        <div class="create-edit-steps<?php echo $courseObjectResourceExist ? ' hide' : ''; ?>">
                             <button class = "resource-button small-button green-button next-step" onclick = "change_tab('describe');" style="width: 210px;"><?php echo __('Next Step', 'curriki'); ?>: <strong><?php echo __('Describe', 'curriki'); ?> ></strong></button>
                             <button class = "resource-but   ton small-button grey-button cancel" onclick = "go_to_dashboard()"><?php echo __('Cancel', 'curriki'); ?></button>
                             <button class="resource-button small-button green-button preview" ng-click="previewResource()"><?php echo __('Preview', 'curriki'); ?></button>

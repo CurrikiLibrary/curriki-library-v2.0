@@ -4,6 +4,25 @@ add_action('wp_ajax_create_resource_course', 'ajax_create_resource_course');
 
 function ajax_create_resource_course() {
 
+    $resource_course_data = array('course_id' => null, 'section_id' => null, 'lesson_id' => null, 'quiz_id' => null, 'course_object_type' => null, 'resource_id' => null);
+    if (isset($_REQUEST['course'])) {
+        $resource_course_data['course_id'] = $_REQUEST['course'];
+        $_REQUEST['resource_type'] = 'collection';
+    }
+    if (isset($_REQUEST['section'])) {
+        $resource_course_data['section_id'] = $_REQUEST['section'];
+        $_REQUEST['resource_type'] = 'collection';
+    }
+    if (isset($_REQUEST['lesson'])) {
+        $resource_course_data['lesson_id'] = $_REQUEST['lesson'];
+    }
+    if (isset($_REQUEST['quiz'])) {
+        $resource_course_data['quiz_id'] = $_REQUEST['quiz'];
+    }
+    if (isset($_REQUEST['course_object_type'])) {
+        $resource_course_data['course_object_type'] = $_REQUEST['course_object_type'];
+    }
+
     $apiCall = false;
     if (isset($_SESSION['api_call'] )) {
        $submit = true;
@@ -26,6 +45,8 @@ function ajax_create_resource_course() {
     $gkeywords = array();
     $current_user = wp_get_current_user();
 
+    // ensure create mode
+    $_REQUEST['resourceid'] = '';
 
     ///$current_user->ID = 10000;
     $_REQUEST['education_levels'] = explode('|', implode('|', (isset($_REQUEST['education_levels']) ? $_REQUEST['education_levels'] : array())));
@@ -414,26 +435,7 @@ function ajax_create_resource_course() {
         }
     }
 
-    $resource_course_data = array('course_id' => null, 'section_id' => null, 'lesson_id' => null, 'quiz_id' => null, 'course_object_type' => null, 'resource_id' => null);
-    if (isset($_REQUEST['course'])) {
-        $resource_course_data['course_id'] = $_REQUEST['course'];
-    }
-    if (isset($_REQUEST['section'])) {
-        $resource_course_data['section_id'] = $_REQUEST['section'];
-    }
-    if (isset($_REQUEST['lesson'])) {
-        $resource_course_data['lesson_id'] = $_REQUEST['lesson'];
-    }
-    if (isset($_REQUEST['quiz'])) {
-        $resource_course_data['quiz_id'] = $_REQUEST['quiz'];
-    }
-    if (isset($_REQUEST['course_object_type'])) {
-        $resource_course_data['course_object_type'] = $_REQUEST['course_object_type'];
-    }
-    if (isset($res_id)) {
-        $resource_course_data['resource_id'] = $res_id;
-    }
-
+    $resource_course_data['resource_id'] = $res_id;
     if (isset($resource_course_data['course_id'])) {
         // insert row into 'resources_courses' table
         $table_name = $wpdb->prefix . 'resources_courses';

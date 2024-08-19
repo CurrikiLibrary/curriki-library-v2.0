@@ -28,7 +28,7 @@ function resourceCourseFilter() : void {
                                     
     <?php
         $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
-        if ($course_id > 0) {
+        if ($course_id > 0 && courseResourceExist()) {
             // global $courseSelectedObject;
             // $courseSelectedObject = "course";
             $course = learn_press_get_course( $course_id );
@@ -73,7 +73,7 @@ function resourceCourseFilter() : void {
     <?php
         $section_id = isset($_REQUEST['section_id']) ? $_REQUEST['section_id'] : 0;
         $lessons = array();
-        if ($section_id > 0) {
+        if ($section_id > 0 && courseSectionResourceExist()) {
             // global $courseSelectedObject;
             // $courseSelectedObject = "section";
             // filter $sections array to get current section by "section_id" key.
@@ -149,16 +149,70 @@ function resourceCourseFilter() : void {
 <?php    
 }
 
-function resourceCourseExist() : bool {
+function courseObjectResourceExist(): bool {
     $ok = false;
     global $wpdb;
     $table_name = $wpdb->prefix . 'resources_courses';
     // check if record exists in the table based on course_id
-    $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
-    $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id", ARRAY_A);
-    if ($wpdb->num_rows > 0) {
-        $ok = true;
+    $course_check = isset($_GET['course_id']) && !isset($_GET['section_id']) && !isset($_GET['lesson_id']);
+    if ($course_check) {
+        $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND resource_id IS NOT NULL ORDER BY resource_id DESC", ARRAY_A);
+        if ($wpdb->num_rows > 0) {
+            $row = $rows[0];
+            $_REQUEST['resourceid'] = $row['resource_id'];
+            $ok = true;
+        }   
     }
     return $ok;
 }
+
+function courseResourceExist(): bool {
+    $ok = false;
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'resources_courses';
+    // check if record exists in the table based on course_id
+    $course_id = isset($_REQUEST['course_id']) ? intval($_REQUEST['course_id']) : 0;
+    if ($course_id > 0) {
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND resource_id IS NULL ORDER BY resource_id DESC", ARRAY_A);
+        if ($wpdb->num_rows > 0) {
+            $ok = true;
+        }   
+    }
+    return $ok;
+}
+
+function courseSectionResourceExist() : bool {
+    $ok = false;
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'resources_courses';
+    // check if record exists in the table based on course_id a section_id
+    $course_id = isset($_REQUEST['course_id']) ? intval($_REQUEST['course_id']) : 0;
+    $section_id = isset($_REQUEST['section_id']) ? intval($_REQUEST['section_id']) : 0;
+    if ($course_id > 0 && $section_id > 0) {
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND section_id = $section_id AND resource_id IS NULL ORDER BY resource_id DESC", ARRAY_A);
+        if ($wpdb->num_rows > 0) {
+            $ok = true;
+        }   
+    }
+    return $ok;
+}
+
+function courseLessonResourceExist() : bool {
+    $ok = false;
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'resources_courses';
+    // check if record exists in the table based on course_id a section_id
+    $course_id = isset($_REQUEST['course_id']) ? intval($_REQUEST['course_id']) : 0;
+    $section_id = isset($_REQUEST['section_id']) ? intval($_REQUEST['section_id']) : 0;
+    $lesson_id = isset($_REQUEST['lesson_id']) ? intval($_REQUEST['lesson_id']) : 0;
+    if ($course_id > 0 && $section_id > 0 && $lesson_id > 0) {
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND lesson_id = $lesson_id AND resource_id IS NULL ORDER BY resource_id DESC", ARRAY_A);
+        if ($wpdb->num_rows > 0) {
+            $ok = true;
+        }   
+    }
+    return $ok;
+}
+
 ?>
