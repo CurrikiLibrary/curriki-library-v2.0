@@ -131,6 +131,18 @@ function curriki_create_resource_scripts() {
         .grecaptcha-badge {
             display: none !important;
         }
+
+        .lp-objects-selectors-col {
+            background-color: #003d90;
+            padding-left: 26px;
+            padding-top: 6px;
+            padding-right: 26px;
+        }
+
+        .lp-objects-selectors-col h4 {
+            color: #fff;
+        }
+
     </style>
     <?php
     wp_enqueue_script('jquery-ui-js', 'https://code.jquery.com/ui/1.12.1/jquery-ui.js', array('jquery'), false, true);
@@ -140,6 +152,11 @@ function curriki_create_resource_scripts() {
 
 function curriki_create_resource_body() {
     $courseObjectResourceExist = courseObjectResourceExist();
+    $courseResourceId = getCourseResourceId();
+    if ($courseResourceId > 0) {
+        $_REQUEST['resourceid'] = $courseResourceId;
+    }
+    
     global $wpdb;
     $current_language = "eng";
     if (defined('ICL_LANGUAGE_CODE'))
@@ -300,13 +317,18 @@ function curriki_create_resource_body() {
     $q_subjectareas = cur_subjectareas_query($current_language, null);
     $subjectareas = $wpdb->get_results($q_subjectareas, ARRAY_A);
 
-    $course_id = isset($_REQUEST['course_id']) ? $_REQUEST['course_id'] : 0;
-    $selected_course = null;
     $selected_course_object_post = null;
-    if ($course_id > 0) {
-        $selected_course = loadCourse($course_id);
-        global $selected_course_object_post;
-        $selected_course_object_post = loadCoursePost($selected_course);
+    $selected_course_object_resource = null;
+    selectedCourseObjectPost();
+    global $selected_course_object_post;
+    global $selected_course_object_resource;
+
+    setCourseObjectType();
+    $courseObjectParentResource = getCourseObjectParentResource();
+    
+    if ($courseObjectParentResource) {
+        $_REQUEST['prid'] = $courseObjectParentResource['resourceid'];
+        $_GET['prid'] = $_REQUEST['prid'];
     }
     ?>
     <div id="resource-tabs" class="container_12" ng-app="ngApp" ng-controller="createResourceCtrl" ng-init="baseurl = '<?php echo get_bloginfo('url'); ?>/';
@@ -317,15 +339,15 @@ function curriki_create_resource_body() {
                 <div class = "submit-card grid_8 card center" style="width: 600px; text-align: center;">
                     <h4><?php echo __('What would you like to do next?', 'curriki'); ?></h4>
                     <div class = "my-library-actions grid_10" style="margin:0 auto">
-                        <?php if (!empty($_SERVER['HTTP_REFERER'])) { ?>
-                            <button class = "resource-button small-button grey-button" onclick="window.location.href = '<?php echo $_SERVER['HTTP_REFERER']; ?>'" style="width: 220px;"><?php echo __('Back to what I was doing', 'curriki'); ?></button>
-                        <?php } ?>
-                        <button class = "resource-button small-button green-button" ng-click="viewResource()" style="width: 220px;"><?php echo __('View ' . $_REQUEST['type'], 'curriki'); ?></button>
+                        <a href="<?php echo get_site_url() . $_SERVER['REQUEST_URI']; ?>" class = "resource-button small-button grey-button" style="width: 220px;color: #FFFFFF;text-transform: capitalize;border-radius: 8px;"><?php echo __('Back to what I was doing'. $type , 'curriki'); ?></a>
+                        <!--
+                        <button class = "resource-button small-button green-button" ng-click="viewResource()" style="width: 220px;"><?php //echo __('View ' . $_REQUEST['type'], 'curriki'); ?></button>
                         <?php
-                        $type = isset($_REQUEST['type']) ? $_REQUEST['type']: 'Resource';
-                        $type_get = ($type == 'collection') ? '?type=collection': '';
+                        //$type = isset($_REQUEST['type']) ? $_REQUEST['type']: 'Resource';
+                        //$type_get = ($type == 'collection') ? '?type=collection': '';
                         ?>
-                        <a href="<?php echo get_site_url(); ?>/create-resource<?php echo $type_get; ?>" class = "resource-button small-button red-button" style="width: 220px;color: #FFFFFF;text-transform: capitalize;border-radius: 8px;"><?php echo __('Submit Another '. $type , 'curriki'); ?></a>
+                        <a href="<?php //echo get_site_url(); ?>/create-resource<?php //echo $type_get; ?>" class = "resource-button small-button red-button" style="width: 220px;color: #FFFFFF;text-transform: capitalize;border-radius: 8px;"><?php //echo __('Submit Another '. $type , 'curriki'); ?></a>
+                        -->
                     </div>
                 </div>
             </div>
@@ -341,6 +363,7 @@ function curriki_create_resource_body() {
             <input type="hidden" name="resource_type" value="<?php echo strtolower($_REQUEST['type']); ?>" />
             <!-- <input type="hidden" name="resourceid" id="resourceid"  value="{{resourceid}}" ng-model="resourceid" ng-init="resourceid = '<?php // echo (!isset($_REQUEST['copy']) && isset($resource['resourceid'])) ? $resource['resourceid'] : ''; ?>'"/> -->
             <input type="hidden" name="resourceid" id="resourceid"  value="" />
+            <input type="hidden" name="course_resource_id" id="course_resource_id"  value="<?php echo $resource ? $resource['resourceid'] : ''; ?>" />
             <?php
             if (isset($resourcefiles) and count($resourcefiles) > 0)
                 foreach ($resourcefiles as $file)
@@ -364,7 +387,7 @@ function curriki_create_resource_body() {
                     <div id="create" class="tab-contents">
                         <?php
                             $cedit = 'Create or Upload';
-                            if (isset($resource['resourceid']))
+                            if ($courseObjectResourceExist)
                                 $cedit = 'Edit';
                             if (isset($_REQUEST['copy']))
                                 $cedit = 'Duplicate';
@@ -385,76 +408,82 @@ function curriki_create_resource_body() {
                         
                         <?php
                         if (isset($_GET['prid']) && $_REQUEST['type'] == 'collection') {
-                            echo '<p class = "desc">' . __('You can add new content to this folder when you are finished.', 'curriki') . '</p>';
+                            // echo '<p class = "desc">' . __('You can add new content to this folder when you are finished.', 'curriki') . '</p>';
                         }
                         $_REQUEST['type'] = ucwords($_REQUEST['type']);
 
-                        setCourseObjectType();
                         ?>
                         <div class = "create-edit-section">
                             <?php if ($courseObjectResourceExist) { ?>
                                 <p>
                                     <!-- bootstrap Edit button -->
-                                    <button style="margin-top: 0px; width: auto;" type="button" class="btn btn-success btn-lg"><i class="fa fa-pencil-square"></i> Edit</button>
+                                    <a style="margin-top: 0px; width: auto; color: #fff;" class="btn btn-success btn-lg" href="<?php echo site_url('oer/'.$selected_course_object_resource["pageurl"]); ?>" target="_blank"><i class="fa fa-pencil-square"></i> Edit</a>
                                 </p>
                             <?php } ?>
                             <!--Resource Title -->
                             <div class = "resource-content-section" ng-non-bindable>
-                                <?php $courseSelectedObject = null; ?>
-                                <h4><?php echo __('Select Course', 'curriki'); ?></h4>
-                                <p>
-                                    <?php
-                                        global $wpdb;
-                                        $courses = $wpdb->get_results("SELECT id, post_name, post_title, post_content, post_type FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'lp_course') limit 1000", ARRAY_A);
-                                    ?>
-                                    <select name="course" id="course" class="form-control" style="width: 100%">
-                                        <option value="" selected="selected">Select Course</option>
-                                        <?php
-                                            foreach ($courses as $course) {
-                                                // get course_id from URL and set selected
-                                                $selected = '';
-                                                if(isset($_REQUEST['course_id']) && $_REQUEST['course_id'] == $course['id']){
-                                                    $selected = ' selected="selected"';
-                                                }
-                                                echo '<option value="' . $course['id'] . '"' . $selected . '>' . $course['post_title'] . '</option>';
-                                            }
-                                        ?>
-                                    </select>
-                                    <script type="text/javascript">
-                                        jQuery(document).ready(function(){
-                                            jQuery('#course').change(function(){
-                                                var course_id = jQuery(this).val();
-                                                // redirect to current page with course id using URL API
-                                                var url = new URL(window.location.href);
-                                                if (course_id == '') {
-                                                    url.searchParams.delete('course_id');
-                                                } else {
-                                                    url.searchParams.set('course_id', course_id);
-                                                }
-
-                                                url.searchParams.delete('section_id');
-                                                url.searchParams.delete('lesson_id');
-                                                window.location.href = url;
-                                            });
-                                        });
-                                    </script>
-                                </p>
-
-                                <?php 
-                                    // if ($courseObjectResourceExist) {
-                                    if ( isset($_GET['course_id']) ) {
-                                        resourceCourseFilter();    
-                                    }
-                                ?>
+                                <?php $courseSelectedObjectType = null; ?>
                                 
+                                <div class="row">
+                                    <div class="col-md-4 filter-col select-course-col">
+                                        <h4><?php echo __('Select Course', 'curriki'); ?></h4>
+                                        <p>
+                                            <?php
+                                                global $wpdb;
+                                                $courses = $wpdb->get_results("SELECT id, post_name, post_title, post_content, post_type FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'lp_course') limit 1000", ARRAY_A);
+                                            ?>
+                                            <select name="course" id="course" class="form-control" style="width: 100%">
+                                                <option value="" selected="selected">Select Course</option>
+                                                <?php
+                                                    foreach ($courses as $course) {
+                                                        // get course_id from URL and set selected
+                                                        $selected = '';
+                                                        if(isset($_REQUEST['course_id']) && $_REQUEST['course_id'] == $course['id']){
+                                                            $selected = ' selected="selected"';
+                                                        }
+                                                        echo '<option value="' . $course['id'] . '"' . $selected . '>' . $course['post_title'] . '</option>';
+                                                    }
+                                                ?>
+                                            </select>
+                                            <script type="text/javascript">
+                                                jQuery(document).ready(function(){
+                                                    jQuery('#course').change(function(){
+                                                        var course_id = jQuery(this).val();
+                                                        // redirect to current page with course id using URL API
+                                                        var url = new URL(window.location.href);
+                                                        if (course_id == '') {
+                                                            url.searchParams.delete('course_id');
+                                                        } else {
+                                                            url.searchParams.set('course_id', course_id);
+                                                        }
+
+                                                        url.searchParams.delete('section_id');
+                                                        url.searchParams.delete('lesson_id');
+                                                        window.location.href = url;
+                                                    });
+                                                });
+                                            </script>
+                                        </p>
+                                    </div>
+                                
+                                    <?php 
+                                        // if ($courseObjectResourceExist) {
+                                        if ( isset($_GET['course_id']) ) {
+                                            resourceCourseFilter();    
+                                        }
+                                    ?>
+                                </div>
+
                                 <?php
-                                    global $courseSelectedObject;
-                                    if ($courseSelectedObject) {
-                                        $courseSelectedObjectStr = ucfirst($courseSelectedObject);
-                                        $cedit = $cedit . " ($courseSelectedObjectStr)";   
+                                    global $courseSelectedObjectType;
+                                    if ($courseSelectedObjectType) {
+                                        $courseSelectedObjectTypeStr = ucfirst($courseSelectedObjectType);
+                                        $cedit = $cedit . " ($courseSelectedObjectTypeStr)";   
                                     }
                                 ?>
-                                <input type="hidden" name="course_object_type" id="course_object_type" value="<?php echo $courseSelectedObject; ?>" />
+
+                                <input type="hidden" name="course_object_type" id="course_object_type" value="<?php echo $courseSelectedObjectType; ?>" />
+                                <hr />
                                 <h3 class="section-header">
                                     <?php echo __($cedit, 'curriki'); ?>
                                 </h3>
@@ -476,13 +505,13 @@ function curriki_create_resource_body() {
                                     $placeholder_title = "Enter " . ( isset($_REQUEST['type']) ? $_REQUEST['type'] : "" ) . " Title";
                                 ?>
                                 <input readonly type="text" class = "resource-title" id = "resource-title"  style="max-width: 100%" name = "title" autofocus placeholder = "<?php echo __($placeholder_title, 'curriki'); ?>" value="<?php 
-                                    global $selected_course_object_post;
-                                    if (isset($resource['title'])) {
-                                        echo $resource['title']; 
-                                    } else if ($selected_course_object_post) {
-                                        echo $selected_course_object_post->post_title;
+                                    // echo $selected_course_object_post ? $selected_course_object_post->post_title : ''; 
+                                    if ($courseObjectResourceExist) {
+                                        echo trim($selected_course_object_resource["title"]);
+                                    } else {
+                                        echo trim($selected_course_object_post->post_title);
                                     }
-                                    ?>" />
+                                ?>" />
                                 <!--Resource Description -->
                                 
                                 <h4><?php echo __('Abstract', 'curriki'); ?></h4><div class = "tooltip fa fa-question-circle" id = "resource-description"></div>
@@ -499,8 +528,10 @@ function curriki_create_resource_body() {
                                 </p>
                                 
                                 <textarea name="description" id="description"><?php 
-                                        if (isset($resource)) {
-                                            echo $resource['description']; 
+                                        if ($courseObjectResourceExist) {
+                                            echo trim($selected_course_object_resource['description']);
+                                        } else {
+                                            echo trim($selected_course_object_post->post_content);
                                         }
                                     ?></textarea>
                                 
@@ -539,13 +570,13 @@ function curriki_create_resource_body() {
                                 </div>
 
                                 <br />
-                                <h4><?php echo __('Contents', 'curriki'); ?> (Read Only)</h4>
+                                <h4><?php echo __('Contents', 'curriki'); ?></h4>
                                 <!-- <p><?php //echo __('Enter your lesson, student material, etc. in the editor below.', 'curriki'); ?></p> -->
-                                <textarea readonly id="elm1" name="content"><?php 
-                                    global $selected_course_object_post;
-                                    if (isset($resource['content'])) {
-                                        echo $resource['content']; 
-                                    } else if ($selected_course_object_post) {
+                                <textarea id="elm1" name="content"><?php 
+                                    //global $selected_course_object_post;
+                                    if ($courseObjectResourceExist) {
+                                        echo trim($selected_course_object_resource['content']);
+                                    } else {
                                         echo trim($selected_course_object_post->post_content);
                                     }
                                 ?></textarea>
@@ -554,7 +585,7 @@ function curriki_create_resource_body() {
                         <?php if ($courseObjectResourceExist) { ?>
                             <p>
                                 <!-- bootstrap Edit button -->
-                                <button style="margin-top: 0px; width: auto;" type="button" class="btn btn-success btn-lg"><i class="fa fa-pencil-square"></i> Edit</button>
+                                <a style="margin-top: 0px; width: auto; color: #fff;" class="btn btn-success btn-lg" href="<?php echo site_url('oer/'.$selected_course_object_resource["pageurl"]); ?>" target="_blank"><i class="fa fa-pencil-square"></i> Edit</a>
                             </p>
                         <?php } ?>
                         <div class="create-edit-steps<?php echo $courseObjectResourceExist ? ' hide' : ''; ?>">
@@ -1070,10 +1101,26 @@ function curriki_create_resource_body() {
             jQuery('.question-tooltip').qtip({
                 content: {
                     text: "If an incorrect answer is selected the text you enter as 'Response to selecting this answer.' will display followed by 'Your answer was incorrect. Please try again.\n<br /><br />\
-        If a correct answer is selected the text you enter as 'Response to selecting this answer.' will display followed by 'Congratulations. You selected the correct answer.'"
+                    If a correct answer is selected the text you enter as 'Response to selecting this answer.' will display followed by 'Congratulations. You selected the correct answer.'"
                 },
                 style: {classes: 'qtipCustomClass forceZIndexQtip'}
             });
+
+            var course_object_type = jQuery('#course_object_type').val();
+            if (course_object_type && course_object_type === 'course') {
+                jQuery('.filter-col').removeClass('lp-objects-selectors-col');
+                jQuery('.select-course-col').addClass('lp-objects-selectors-col');
+            }
+
+            if (course_object_type && course_object_type === 'section') {
+                jQuery('.filter-col').removeClass('lp-objects-selectors-col');
+                jQuery('.select-section-col').addClass('lp-objects-selectors-col');
+            }
+
+            if (course_object_type && course_object_type === 'lesson') {
+                jQuery('.filter-col').removeClass('lp-objects-selectors-col');
+                jQuery('.select-lesson-col').addClass('lp-objects-selectors-col');
+            }
         });
 
         function createSubmitCaptcha(token) {
