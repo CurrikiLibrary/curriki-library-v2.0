@@ -262,7 +262,7 @@ function courseResourceExist(): bool {
     // check if record exists in the table based on course_id
     $course_id = isset($_REQUEST['course_id']) ? intval($_REQUEST['course_id']) : 0;
     if ($course_id > 0) {
-        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND resource_id IS NULL ORDER BY resource_id DESC", ARRAY_A);
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND section_id IS NULL AND lesson_id IS NULL AND quiz_id IS NULL AND resource_id IS NOT NULL ORDER BY resource_id DESC", ARRAY_A);
         if ($wpdb->num_rows > 0) {
             $ok = true;
         }   
@@ -279,7 +279,7 @@ function courseSectionResourceExist() : bool {
     $section_id = isset($_REQUEST['section_id']) ? intval($_REQUEST['section_id']) : 0;
     
     if ($course_id > 0 && $section_id > 0) {
-        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND section_id = $section_id AND resource_id IS NOT NULL ORDER BY resource_id DESC", ARRAY_A);
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND section_id = $section_id AND lesson_id IS NULL AND quiz_id IS NULL AND resource_id IS NOT NULL ORDER BY resource_id DESC", ARRAY_A);
         if ($wpdb->num_rows > 0) {
             $ok = true;
         }   
@@ -296,7 +296,7 @@ function courseLessonResourceExist() : bool {
     $section_id = isset($_REQUEST['section_id']) ? intval($_REQUEST['section_id']) : 0;
     $lesson_id = isset($_REQUEST['lesson_id']) ? intval($_REQUEST['lesson_id']) : 0;
     if ($course_id > 0 && $section_id > 0 && $lesson_id > 0) {
-        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND lesson_id = $lesson_id AND resource_id IS NOT NULL ORDER BY resource_id DESC", ARRAY_A);
+        $rows = $wpdb->get_results("SELECT * FROM $table_name WHERE course_id = $course_id AND lesson_id = $lesson_id AND quiz_id IS NULL AND resource_id IS NOT NULL ORDER BY resource_id DESC", ARRAY_A);
         if ($wpdb->num_rows > 0) {
             $ok = true;
         }   

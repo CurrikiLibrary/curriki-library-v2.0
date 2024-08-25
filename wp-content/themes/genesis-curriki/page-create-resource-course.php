@@ -531,7 +531,7 @@ function curriki_create_resource_body() {
                                         if ($courseObjectResourceExist) {
                                             echo trim($selected_course_object_resource['description']);
                                         } else {
-                                            echo trim($selected_course_object_post->post_content);
+                                            echo strip_tags(trim($selected_course_object_post->post_content));
                                         }
                                     ?></textarea>
                                 
