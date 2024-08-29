@@ -11,3 +11,5 @@ require_once __DIR__.'/imports/functions.php';
 require_once __DIR__.'/recomender/helper.php';
 require_once __DIR__.'/lti/index.php';
 require_once __DIR__.'/create_course_oer.php';
+require_once __DIR__.'/oer_shortcode_columns.php';
+require_once __DIR__.'/oer_shortcode.php';

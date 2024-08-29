@@ -2567,3 +2567,9 @@ require_once($dir . DIRECTORY_SEPARATOR . 'functions' . DIRECTORY_SEPARATOR . 'i
 if (function_exists('curriki_manage_db_setup')) {
     register_activation_hook(__FILE__, 'curriki_manage_db_setup');
 }
+
+add_action('init', function() {
+    if(function_exists('oer_shortcode')) {
+        add_shortcode('oer', 'oer_shortcode');
+    }
+});
