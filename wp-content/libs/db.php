@@ -41,7 +41,7 @@ class db {
   ////////////////////
   // CRUD Functions //
   ////////////////////
-  function db($dbhost = '', $dbuser = '', $dbpwd = '', $dbdatabase = '') {
+  function __construct($dbhost = '', $dbuser = '', $dbpwd = '', $dbdatabase = '') {
     global $global;
     $this->dbdatabase = $dbdatabase;
 

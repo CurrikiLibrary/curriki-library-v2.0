@@ -1,7 +1,8 @@
 <?php
 
 //***************** Preparing Amazone Domain variables ******************//
-require_once dirname(__FILE__) . '/aws_sdk/aws-autoloader.php';
+// require_once dirname(__FILE__) . '/aws_sdk/aws-autoloader.php';
+require_once dirname(__FILE__) . '/aws/vendor/autoload.php';
 require_once dirname(__FILE__) . '/db.php';
 
 require_once( dirname(dirname(dirname(__FILE__))) . '/wp-load.php' );
@@ -21,7 +22,7 @@ if ($_SERVER['HTTP_HOST'] == 'cg.curriki.org') {
   $db_user = DB_USER;
   $db_pass = DB_PASSWORD;
   $db_name = DB_NAME;
-  $vars['wp_contents'] = LOCAL_PROJECT_PATH . '/wp-content';
+  $vars['wp_contents'] = $_SERVER['REQUEST_URI'] . 'wp-content';
 } else {
   $db_host = DB_HOST;
   $db_user = DB_USER;
@@ -46,7 +47,17 @@ foreach ($result as $r) {
 $vars['base_url'] = ($_SERVER['SERVER_PORT'] == 443 ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $vars['wp_contents'];
 $vars['current_path'] = $_SERVER['DOCUMENT_ROOT'] . $vars['wp_contents']; // relative path from filemanager folder to upload files folder
 $vars['upload_path'] = $vars['current_path'] . $vars['resUploadFolder']; // relative path from filemanager folder to upload files folder
-$vars['aws'] = Aws::factory($vars['current_path'] . '/libs/aws_sdk/config.php');
+// $vars['aws'] = Aws::factory($vars['current_path'] . '/libs/aws_sdk/config.php');
+// Initialize the AWS SDK
+$awsSdk = new \Aws\Sdk([
+  'region'   => 'us-west-2',
+  'version'  => 'latest',
+  'credentials' => [
+      'key'    => DBI_AWS_ACCESS_KEY_ID,
+      'secret' => DBI_AWS_SECRET_ACCESS_KEY,
+  ]
+]);
+$vars['aws'] = $awsSdk;
 unset($result);
 unset($r);
 extract($vars);

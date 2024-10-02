@@ -1,0 +1,16 @@
+{
+    "name": "currikilibrary/waqar",
+    "autoload": {
+        "psr-4": {
+            "Currikilibrary\\Waqar\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Waqar Muneer"
+        }
+    ],
+    "require": {
+        "aws/aws-sdk-php": "^3.321"
+    }
+}

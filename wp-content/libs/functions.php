@@ -545,13 +545,39 @@ function getQuestionsEmbedHTML(&$response) {
 //* * **************End Uploading Process File and amazon S3 and Video transcoding *************** */
 //* * **************Start Amazone Cloud Synching Cron jobs*************** */
 
-function awsCloudSearchUpload($file) {
+function awsCloudSearchUploadOld($file) {
     global $vars;
     if (!isset($vars['csd']))
         $vars['csd'] = $vars['aws']->get('CloudSearchDomain', array('base_url' => $vars['awsSearchEndPoint']));
 
     return $vars['csd']->uploadDocuments(array('documents' => file_get_contents($file), 'contentType' => 'application/xml'));
 }
+
+function awsCloudSearchUpload($file) {
+    global $vars;
+    
+    $endpoint = $vars['awsSearchEndPoint'];
+    
+    // Create credentials object
+    $credentials = new Aws\Credentials\Credentials(DBI_AWS_ACCESS_KEY_ID, DBI_AWS_SECRET_ACCESS_KEY);
+
+    // Instantiate CloudSearchDomainClient with credentials
+    $client = new Aws\CloudSearchDomain\CloudSearchDomainClient([
+        'version'     => 'latest',
+        'region'      => 'us-west-2',
+        'endpoint'    => $endpoint,
+        'credentials' => $credentials, // Pass credentials object here
+    ]);
+
+    // Upload the XML documents to CloudSearch
+    $result = $client->uploadDocuments([
+        'contentType' => 'application/xml',  // Specify XML format
+        'documents'   => file_get_contents($file),  // The XML content as a string
+    ]);
+
+    return $result;
+}
+
 function awsCloudSearchUploadXML($xml) {
     global $vars;
     if (!isset($vars['csd']))
@@ -607,7 +633,12 @@ function getSdfFilesContent($resourceid) {
     $contents = '';
     global $db, $vars;
 
-    $vars['s3_client'] = isset($vars['s3_client']) ? $vars['s3_client'] : $vars['aws']->get('S3');
+    // $vars['s3_client'] = isset($vars['s3_client']) ? $vars['s3_client'] : $vars['aws']->get('S3');
+    if (isset($vars['s3_client'])) {
+        $vars['s3_client'] = $vars['s3_client'];
+    } else {
+        $vars['s3_client'] = $vars['aws']->createS3();
+    }
     $files = $db->select("SELECT * FROM resourcefiles where uniquename is not null and uniquename != '' and resourceid = " . intval($resourceid));
     if ($files)
         foreach ($files as $file) {
@@ -694,7 +725,8 @@ function safeAWSDate($str) {
 
 function awsPrepareXmlUp($type = 'resources', $limit = 10) {
     $hascommunity = false;
-    $xmlFile = '/tmp/' . time() . rand() . '.xml';
+    //$xmlFile = '/tmp/' . time() . rand() . '.xml';
+    $xmlFile = wp_upload_dir()["basedir"]. '/' . time() . rand() . '.xml';
     
     file_put_contents($xmlFile, '<?xml version="1.0" encoding="UTF-8"?><batch>');
     
@@ -744,25 +776,25 @@ function awsPrepareXmlUp($type = 'resources', $limit = 10) {
                     }
 
                     $education_levels = $db->select("SELECT rel.educationlevelid
-            FROM resource_educationlevels rel 
-            WHERE rel.resourceid = $resourceid  limit 1000");
+                    FROM resource_educationlevels rel 
+                    WHERE rel.resourceid = $resourceid  limit 1000");
 
-                    $instruction_types = $db->select("SELECT inst.name
-            FROM resource_instructiontypes as rin
-            JOIN instructiontypes as inst on rin.instructiontypeid = inst.instructiontypeid
-            WHERE rin.resourceid = $resourceid  limit 1000");
+                            $instruction_types = $db->select("SELECT inst.name
+                    FROM resource_instructiontypes as rin
+                    JOIN instructiontypes as inst on rin.instructiontypeid = inst.instructiontypeid
+                    WHERE rin.resourceid = $resourceid  limit 1000");
 
-                    $subjects = $db->select("SELECT sb.subject, sub.subjectarea
-            FROM resource_subjectareas as rsa
-            JOIN subjectareas as sub on sub.subjectareaid = rsa.subjectareaid
-            JOIN subjects as sb on sub.subjectid = sb.subjectid
-            WHERE rsa.resourceid = $resourceid  limit 1000");
+                            $subjects = $db->select("SELECT sb.subject, sub.subjectarea
+                    FROM resource_subjectareas as rsa
+                    JOIN subjectareas as sub on sub.subjectareaid = rsa.subjectareaid
+                    JOIN subjects as sb on sub.subjectid = sb.subjectid
+                    WHERE rsa.resourceid = $resourceid  limit 1000");
 
-                    $standards = $db->select("select distinct st.statementid,st.resourceidentifier,s.title as standard
-            FROM standards s
-            INNER JOIN statements st on s.standardid = st.standardid
-            INNER JOIN resource_statements rs on rs.statementid = st.statementid
-            WHERE rs.resourceid = $resourceid limit 1000");
+                            $standards = $db->select("select distinct st.statementid,st.resourceidentifier,s.title as standard
+                    FROM standards s
+                    INNER JOIN statements st on s.standardid = st.standardid
+                    INNER JOIN resource_statements rs on rs.statementid = st.statementid
+                    WHERE rs.resourceid = $resourceid limit 1000");
 
                     $group_resources = $db->select("select * from group_resources WHERE resourceid = $resourceid limit 1000");
                     
@@ -886,15 +918,15 @@ function awsPrepareXmlUp($type = 'resources', $limit = 10) {
                     }
                 }
 
-            if (strlen(file_get_contents($xmlFile)) > 60) {
-                file_put_contents($xmlFile, '</batch>', FILE_APPEND);
-                if (isset($_REQUEST['test']))
-                    print_xml(file_get_contents($xmlFile));
-                print_array(awsCloudSearchUpload($xmlFile));
-                $db->update('resources', $indexed, 'resourceid in ( ' . implode(',', $updateIds) . ')');
-            }
+                if (strlen(file_get_contents($xmlFile)) > 60) {
+                    file_put_contents($xmlFile, '</batch>', FILE_APPEND);
+                    if (isset($_REQUEST['test']))
+                        print_xml(file_get_contents($xmlFile));
+                    print_array(awsCloudSearchUpload($xmlFile));
+                    $db->update('resources', $indexed, 'resourceid in ( ' . implode(',', $updateIds) . ')');
+                }
 
-            break;
+                break;
 
 //**************************************************************************************************//
         case 'groups':

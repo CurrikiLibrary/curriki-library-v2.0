@@ -9,6 +9,12 @@ return $config = array(
         // providing a default region setting.
         'default_settings' => array(
             'params' => array(
+                /*'key'    => 'AKIAJ47Q4ZUGD5VXDHXQ',
+                'secret' => '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',
+                'region' => 'us-west-1'*/
+                /* 'key'    => 'AKIAIYF47XDCNT373XDQ',
+                'secret' => '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',
+                'region' => 'us-west-2' */
                 'key'    => DBI_AWS_ACCESS_KEY_ID,
                 'secret' => DBI_AWS_SECRET_ACCESS_KEY,
                 'region' => 'us-east-1'
