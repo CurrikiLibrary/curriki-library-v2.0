@@ -79,7 +79,7 @@ and open the template in the editor.
 
 body.group-create,body.directory
 {
-    background-color: #f1f1f1 !important;
+    /* background-color: #f1f1f1 !important; */
 }
 
 body.group-create #group-create-tabs .ui-tabs-nav {
@@ -1304,12 +1304,12 @@ body.user-dashboard .popup-button-dn
 
 #groups_search_submit
 {
-    background: none repeat scroll 0 0 #a5c546 !important;
+    background: none repeat scroll 0 0 var(--e-global-color-primary) !important;
 }
 
 #groups_search_submit:hover
 {
-    background: none repeat scroll 0 0 #7da941 !important;
+    background: none repeat scroll 0 0 var(--primary-hover-cur) !important;
 }
 
 body.page-template-page-group .card-button .leave-group

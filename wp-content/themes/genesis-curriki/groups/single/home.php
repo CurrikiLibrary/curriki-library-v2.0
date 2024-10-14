@@ -1,6 +1,6 @@
 <?php
 
-get_header();
+get_header("custom");
 
 if ( bp_has_groups() ) : 
 	while ( bp_groups() ) : 

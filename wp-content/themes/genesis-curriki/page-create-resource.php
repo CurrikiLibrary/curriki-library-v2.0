@@ -96,40 +96,6 @@ function curriki_create_resource_scripts() {
     );
     wp_localize_script('page-create-resource', 'pcr_ml_obj', $ml_arr_page_create_resource);
     wp_enqueue_script('page-create-resource');
-    ?>
-    <script>
-        var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
-        var baseurl = '<?php echo get_bloginfo('url'); ?>/';
-        var trusted = '<?php echo $wpdb->get_var("select trusted from users where userid = '" . $current_user->ID . "'"); ?>';
-    </script>
-    <script>
-        var external_tool = '';
-        <?php
-        if(get_current_user_id() > 0){
-            $current_user = wp_get_current_user();
-            if($current_user->user_login == "eprofessor"){
-                ?>
-                    external_tool = 'external_tool';
-                <?php
-            }
-        }
-            
-        ?>
-    </script>
-    <style>
-        .standards-alignment-box select{ width: 100%; max-width: 100%; font-size: 14px;}
-        .standards-alignment-box option{ padding:2px;}
-        .qtipCustomClass{border-color: #0E9236 !important;background-color: #99c736 !important;}
-        .qtipCustomClass .qtip-content{font-size: 12px !important;color: #FFF !important;}
-        .tooltip:hover{cursor: help !important;}    
-        .forceZIndexQtip{
-            z-index: 99999999999999 !important;
-        }
-        .grecaptcha-badge {
-            display: none !important;
-        }
-    </style>
-    <?php
     wp_enqueue_script('jquery-ui-js', 'https://code.jquery.com/ui/1.12.1/jquery-ui.js', array('jquery'), false, true);
     wp_enqueue_script('recaptcha', 'https://www.google.com/recaptcha/api.js', null, false, true);
     
@@ -989,6 +955,39 @@ function curriki_create_resource_body() {
             });  
         }
     </script>
+
+    <script>
+        var ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
+        var baseurl = '<?php echo get_bloginfo('url'); ?>/';
+        var trusted = '<?php echo $wpdb->get_var("select trusted from users where userid = '" . $current_user->ID . "'"); ?>';
+    </script>
+    <script>
+        var external_tool = '';
+        <?php
+        if(get_current_user_id() > 0){
+            $current_user = wp_get_current_user();
+            if($current_user->user_login == "eprofessor"){
+                ?>
+                    external_tool = 'external_tool';
+                <?php
+            }
+        }
+            
+        ?>
+    </script>
+    <style>
+        .standards-alignment-box select{ width: 100%; max-width: 100%; font-size: 14px;}
+        .standards-alignment-box option{ padding:2px;}
+        .qtipCustomClass{border-color: #0E9236 !important;background-color: #99c736 !important;}
+        .qtipCustomClass .qtip-content{font-size: 12px !important;color: #FFF !important;}
+        .tooltip:hover{cursor: help !important;}    
+        .forceZIndexQtip{
+            z-index: 99999999999999 !important;
+        }
+        .grecaptcha-badge {
+            display: none !important;
+        }
+    </style>
     <?php
 }
 

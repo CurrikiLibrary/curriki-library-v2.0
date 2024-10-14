@@ -513,3 +513,29 @@ function add_content_creator_role() {
 }
 
 add_action( 'init', 'add_content_creator_role' );
+
+/*
+function theme_prefix_register_elementor_locations( $elementor_theme_manager ) {
+
+  var_dump($elementor_theme_manager);
+  $elementor_theme_manager->register_all_core_location();
+	$elementor_theme_manager->register_location( 'header' );
+	$elementor_theme_manager->register_location( 'footer' );
+  $elementor_theme_manager->register_location( 'groups' );
+	// $elementor_theme_manager->register_location( 'single' );
+	// $elementor_theme_manager->register_location( 'archive' );
+
+}
+add_action( 'elementor/theme/register_locations', 'theme_prefix_register_elementor_locations' );
+*/
+
+// Manually enqueue Elementor global styles and fonts
+// add_action('wp_enqueue_scripts', function() {
+//   // Enqueue global styles
+//   // wp_enqueue_style('elementor-frontend', ELEMENTOR_ASSETS_URL . 'css/frontend.min.css', [], ELEMENTOR_VERSION);
+//   // wp_enqueue_style('elementor-global', ELEMENTOR_ASSETS_URL . 'css/global.css', [], ELEMENTOR_VERSION);
+
+//   // Enqueue fonts
+//   // wp_enqueue_style('elementor-icons', ELEMENTOR_ASSETS_URL . 'lib/eicons/css/elementor-icons.min.css', [], ELEMENTOR_VERSION);
+//   wp_enqueue_style('elementor-google-fonts', 'https://fonts.googleapis.com/css?family=Roboto%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CRoboto+Slab%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CMontserrat%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&display=swap&ver=6.6.1', [], null);
+// });

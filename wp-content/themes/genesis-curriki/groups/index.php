@@ -1,6 +1,6 @@
 <?php 
 // gconnect_get_header();
-get_header();
+get_header('custom');
 do_action( 'bp_before_directory_groups_page' );
 do_action( 'bp_before_directory_groups' );
 
@@ -85,12 +85,6 @@ $group_loop_source = "group";
 	</form><!-- #groups-directory-form -->
         
     </div>
-
-<script type="text/javascript">
-    jq(document).ready(function(){
-        //console.log("pera in ");
-    });
-</script>
 
 <?php 
 do_action( 'bp_after_directory_groups' );

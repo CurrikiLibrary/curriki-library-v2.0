@@ -37,7 +37,7 @@ function curriki_customized_scripts() {
     wp_enqueue_style('curriki-tooltip', get_stylesheet_directory_uri() . '/curriki-customized/css/jquery.tooltip.css');
     wp_enqueue_script('curriki-tooltip', get_stylesheet_directory_uri() . '/curriki-customized/js/jquery.tooltip.min.js', array(), '1.0.0', true);
 
-    wp_enqueue_style('curriki-custom-style', get_stylesheet_directory_uri() . '/css/curriki-custom-style.min.css');
+    //wp_enqueue_style('curriki-custom-style', get_stylesheet_directory_uri() . '/css/curriki-custom-style.min.css');
 
     wp_enqueue_script('ext-base-js', get_stylesheet_directory_uri() . '/js/xwiki/ext-base.js', array(), '1.0.0', true);
     //wp_enqueue_script( 'ext-all-debug-js', get_stylesheet_directory_uri() . '/js/xwiki/ext-all-debug.js', array(), '1.0.0', true );
@@ -50,6 +50,13 @@ function curriki_customized_scripts() {
 }
 
 add_action('wp_enqueue_scripts', 'curriki_customized_scripts');
+
+function cur_theme_enqueue_styles() {
+  // wp_enqueue_style( 'my-footer-styles', get_template_directory_uri() . '/css/footer.css', array(), '1.0', 'all' );
+  wp_enqueue_style('curriki-custom-style', get_stylesheet_directory_uri() . '/css/curriki-custom-style.min.css', array(), '1.0', 'all');
+}
+add_action( 'wp_footer', 'cur_theme_enqueue_styles' );
+
 
 add_action('genesis_meta', 'curriki_head_baseurl');
 
