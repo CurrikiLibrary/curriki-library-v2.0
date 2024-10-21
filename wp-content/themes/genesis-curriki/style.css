@@ -432,7 +432,7 @@ textarea {
   font-size: 0.81em !important;
   font-weight: 400 !important;
   padding: 6px 16px !important;
-  width: 280px !important;
+  /* width: 280px !important; */
 }
 
 input:focus,

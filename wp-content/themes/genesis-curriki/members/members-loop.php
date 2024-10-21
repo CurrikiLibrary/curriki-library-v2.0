@@ -1,18 +1,19 @@
 <?php do_action( 'bp_before_members_loop' ); ?>
 
 <?php if ( bp_has_members( bp_ajax_querystring( 'members' ) ) ) : ?>
+	<!-- 
 	<div id="pag-top" class="pagination">
 		<div class="pag-count" id="member-dir-count-top">
-			<?php bp_members_pagination_count(); ?>
+			<?php // bp_members_pagination_count(); ?>
 		</div>
 		<div class="pagination-links" id="member-dir-pag-top">
-			<?php bp_members_pagination_links(); ?>
+			<?php // bp_members_pagination_links(); ?>
 		</div>
 	</div>
-
+	 -->
 	<?php do_action( 'bp_before_directory_members_list' ); ?>
 
-	<ul id="members-list" class="item-list" role="main">
+	<ul id="members-list" class="item-list members-list-custom" role="main">
 
 	<?php while ( bp_members() ) : bp_the_member(); ?>
 
@@ -110,28 +111,6 @@
 	<?php endwhile; ?>
 
 	</ul>
-
-	<?php do_action( 'bp_after_directory_members_list' ); bp_member_hidden_fields(); ?>
-
-	<div id="pag-bottom" class="pagination">
-		<div class="pag-count" id="member-dir-count-bottom">
-			<?php bp_members_pagination_count(); ?>
-		</div>
-		<div class="pagination-links" id="member-dir-pag-bottom">
-			<?php bp_members_pagination_links(); ?>
-		</div>
-	</div>
-<?php else: ?>
-	<div id="message" class="info">
-            <?php
-            global $bp;            
-            if($bp->current_component == 'following')
-            { ?>
-                    <p><?php echo __('This user is not currently following anyone','curriki'); ?></p>
-            <?php }else{ ?>
-		<p><?php _e( "Sorry, no members were found.", 'buddypress' ); ?></p>
-            <?php } ?>
-	</div>
 <?php endif; ?>
 
 <?php do_action( 'bp_after_members_loop' ); ?>

@@ -514,28 +514,93 @@ function add_content_creator_role() {
 
 add_action( 'init', 'add_content_creator_role' );
 
-/*
-function theme_prefix_register_elementor_locations( $elementor_theme_manager ) {
+function bp_support_theme_setup() {
+  global $bp;
 
-  var_dump($elementor_theme_manager);
-  $elementor_theme_manager->register_all_core_location();
-	$elementor_theme_manager->register_location( 'header' );
-	$elementor_theme_manager->register_location( 'footer' );
-  $elementor_theme_manager->register_location( 'groups' );
-	// $elementor_theme_manager->register_location( 'single' );
-	// $elementor_theme_manager->register_location( 'archive' );
+  // Load the default BuddyPress AJAX functions if it isn't explicitly disabled or if it isn't already included in a custom theme
+  if ( ! function_exists( 'bp_dtheme_ajax_querystring' ) )
+  require_once( BP_PLUGIN_DIR . '/bp-themes/bp-default/_inc/ajax.php' );
 
+  // Let's tell BP that we support it!
+  add_theme_support( 'buddypress' );
+
+  if ( ! is_admin() ) {
+    // Register buttons for the relevant component templates
+    // Friends button
+    if ( bp_is_active( 'friends' ) )
+    add_action( 'bp_member_header_actions', 'bp_add_friend_button' );
+
+    // Activity button
+    if ( bp_is_active( 'activity' ) )
+    add_action( 'bp_member_header_actions', 'bp_send_public_message_button' );
+
+    // Messages button
+    if ( bp_is_active( 'messages' ) )
+    add_action( 'bp_member_header_actions', 'bp_send_private_message_button' );
+
+    // Group buttons
+    if ( bp_is_active( 'groups' ) ) {
+      add_action( 'bp_group_header_actions', 'bp_group_join_button' );
+      add_action( 'bp_group_header_actions', 'bp_group_new_topic_button' );
+      add_action( 'bp_directory_groups_actions', 'bp_group_join_button' );
+    }
+
+    // Blog button
+    if ( bp_is_active( 'blogs' ) )
+    add_action( 'bp_directory_blogs_actions', 'bp_blogs_visit_blog_button' );
+  }
 }
-add_action( 'elementor/theme/register_locations', 'theme_prefix_register_elementor_locations' );
+add_action( 'after_setup_theme', 'bp_support_theme_setup', 11 );
+
+/**
+* Enqueues BuddyPress JS and related AJAX functions
+*
+* @since 1.2
 */
+function bp_support_enqueue_scripts() {
 
-// Manually enqueue Elementor global styles and fonts
-// add_action('wp_enqueue_scripts', function() {
-//   // Enqueue global styles
-//   // wp_enqueue_style('elementor-frontend', ELEMENTOR_ASSETS_URL . 'css/frontend.min.css', [], ELEMENTOR_VERSION);
-//   // wp_enqueue_style('elementor-global', ELEMENTOR_ASSETS_URL . 'css/global.css', [], ELEMENTOR_VERSION);
+  // Add words that we need to use in JS to the end of the page so they can be translated and still used.
+  $params = array(
+    'my_favs' => __( 'My Favorites', 'buddypress' ),
+    'accepted' => __( 'Accepted', 'buddypress' ),
+    'rejected' => __( 'Rejected', 'buddypress' ),
+    'show_all_comments' => __( 'Show all comments for this thread', 'buddypress' ),
+    'show_all' => __( 'Show all', 'buddypress' ),
+    'comments' => __( 'comments', 'buddypress' ),
+    'close' => __( 'Close', 'buddypress' )
+  );
 
-//   // Enqueue fonts
-//   // wp_enqueue_style('elementor-icons', ELEMENTOR_ASSETS_URL . 'lib/eicons/css/elementor-icons.min.css', [], ELEMENTOR_VERSION);
-//   wp_enqueue_style('elementor-google-fonts', 'https://fonts.googleapis.com/css?family=Roboto%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CRoboto+Slab%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CMontserrat%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2C400%2C400italic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic&display=swap&ver=6.6.1', [], null);
-// });
+  // BP 1.5+
+  if ( version_compare( BP_VERSION, '1.3', '>' ) ) {
+    // Bump this when changes are made to bust cache
+    $version = '20120412';
+
+    $params['view'] = __( 'View', 'buddypress' );
+    $params['mark_as_fav'] = __( 'Favorite', 'buddypress' );
+    $params['remove_fav'] = __( 'Remove Favorite', 'buddypress' );
+  }
+  // BP 1.2.x
+  else {
+    $version = '20110729';
+
+    if ( bp_displayed_user_id() )
+    $params['mention_explain'] = sprintf( __( "%s is a unique identifier for %s that you can type into any message on this site. %s will be sent a notification and a link to your message any time you use it.", 'buddypress' ), '@' . bp_get_displayed_user_username(), bp_get_user_firstname( bp_get_displayed_user_fullname() ), bp_get_user_firstname( bp_get_displayed_user_fullname() ) );
+  }
+
+  // Enqueue the global JS – Ajax will not work without it
+  //wp_enqueue_script('dtheme-ajax-js', BP_PLUGIN_URL . 'bp-themes/bp-default/_inc/global.js', array('jquery'), $version );
+
+  // Enqueue jQuery if not already included
+  wp_enqueue_script('jquery');
+  wp_enqueue_script('jq-query', BP_PLUGIN_URL . 'bp-core/js/jquery-query.min.js',  array('jquery'), $version, true);
+
+  // Enqueue the jQuery Cookie plugin
+  wp_enqueue_script('jquery-cookie', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js', array('jquery'), '1.4.1', true);
+
+  // Enqueue the global.js script
+  wp_enqueue_script('dtheme-ajax-js', BP_PLUGIN_URL . 'bp-themes/bp-default/_inc/global.js', array('jquery', 'jquery-cookie'), $version, true);
+  
+  // Localize the JS strings
+  wp_localize_script( 'dtheme-ajax-js', 'BP_DTheme', $params );
+}
+add_action( 'wp_enqueue_scripts', 'bp_support_enqueue_scripts' );
